@@ -5,7 +5,7 @@ import { Icons } from '../components/icons';
 
 const ACCENT = '#EF4444';
 
-export function LoginScreen() {
+export function LoginScreen({ onGuest }: { onGuest: () => void }) {
   const { signInWithEmail } = useAuth();
   const [email, setEmail]   = useState('');
   const [sent, setSent]     = useState(false);
@@ -122,6 +122,19 @@ export function LoginScreen() {
 
             <div style={{ marginTop: 20, fontSize: 12, color: '#A3A3A3', textAlign: 'center', lineHeight: 1.6 }}>
               Your data is tied to your email and syncs across all your devices.
+            </div>
+
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <button
+                onClick={onGuest}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: 13, color: '#A3A3A3', textDecoration: 'underline',
+                  fontFamily: 'inherit',
+                }}
+              >
+                Continue as guest
+              </button>
             </div>
           </>
         )}

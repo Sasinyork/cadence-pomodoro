@@ -21,6 +21,8 @@ function useIsMobile() {
   return isMobile;
 }
 
+const GUEST_KEY = 'cadence-guest';
+
 export default function App() {
   const { state, dispatch } = useApp();
   const { user, loading, signOut } = useAuth();
@@ -29,7 +31,20 @@ export default function App() {
   const accent = getAccent(state.mode, state.palette);
   const isDark = state.theme === 'dark';
 
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem(GUEST_KEY) === 'true');
+
   useDbSync(user?.id ?? null);
+
+  function handleGuest() {
+    localStorage.setItem(GUEST_KEY, 'true');
+    setIsGuest(true);
+  }
+
+  async function handleSignOut() {
+    if (user) await signOut();
+    localStorage.removeItem(GUEST_KEY);
+    setIsGuest(false);
+  }
 
   if (loading) {
     return (
@@ -45,8 +60,8 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <LoginScreen />;
+  if (!user && !isGuest) {
+    return <LoginScreen onGuest={handleGuest} />;
   }
 
   if (isMobile) {
@@ -72,10 +87,11 @@ export default function App() {
         active={state.currentScreen === 'tasks' ? 'timer' : state.currentScreen}
         isDark={isDark}
         themeSource={state.themeSource}
-        userEmail={user.email ?? ''}
+        userEmail={user?.email ?? 'Guest'}
+        isGuest={isGuest && !user}
         onNavigate={(screen) => dispatch({ type: 'SET_SCREEN', screen })}
         onSetThemeSource={(source) => dispatch({ type: 'SET_THEME_SOURCE', source })}
-        onSignOut={signOut}
+        onSignOut={handleSignOut}
       />
 
       <div id="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>

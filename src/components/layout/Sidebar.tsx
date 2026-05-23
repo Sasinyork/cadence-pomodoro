@@ -11,12 +11,13 @@ interface SidebarProps {
   isDark: boolean;
   themeSource: ThemeSource;
   userEmail: string;
+  isGuest: boolean;
   onNavigate: (screen: Screen) => void;
   onSetThemeSource: (source: ThemeSource) => void;
   onSignOut: () => void;
 }
 
-export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEmail, onNavigate, onSetThemeSource, onSignOut }: SidebarProps) {
+export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEmail, isGuest, onNavigate, onSetThemeSource, onSignOut }: SidebarProps) {
   const items: { id: Screen; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'timer',     label: 'Timer',     icon: <Icons.timer size={18} /> },
     { id: 'tasks',     label: 'Tasks',     icon: <Icons.check size={18} />, badge: undefined },
@@ -133,25 +134,25 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
           <span style={{ marginLeft: 'auto', fontFamily: '"JetBrains Mono", monospace', fontSize: 10, padding: '2px 5px', background: t.surfaceAlt, borderRadius: 4 }}>⌘K</span>
         </div>
 
-        {/* Signed-in user + sign out */}
+        {/* User row */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '10px 12px', borderTop: `1px solid ${t.borderSoft}`, marginTop: 4,
         }}>
           <div style={{
             width: 26, height: 26, borderRadius: 13, flexShrink: 0,
-            background: alpha(accent, 0.15),
+            background: isGuest ? t.surfaceAlt : alpha(accent, 0.15),
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 700, color: accent,
+            fontSize: 11, fontWeight: 700, color: isGuest ? t.textFaint : accent,
           }}>
-            {userEmail.charAt(0).toUpperCase()}
+            {isGuest ? '?' : userEmail.charAt(0).toUpperCase()}
           </div>
           <span style={{ flex: 1, fontSize: 11.5, color: t.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {userEmail}
+            {isGuest ? 'Guest — data not saved' : userEmail}
           </span>
           <button
             onClick={onSignOut}
-            title="Sign out"
+            title={isGuest ? 'Sign in' : 'Sign out'}
             style={{
               flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer',
               padding: 4, borderRadius: 5, color: t.textFaint, display: 'flex',
