@@ -79,12 +79,14 @@ export default function App() {
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       display: 'flex',
       fontFeatureSettings: '"cv11", "ss01"',
+      backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.09)'} 1px, transparent 1px)`,
+      backgroundSize: '22px 22px',
     }}>
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
       <Sidebar
         theme={t} accent={accent}
-        active={state.currentScreen === 'tasks' ? 'timer' : state.currentScreen}
+        active={state.currentScreen}
         isDark={isDark}
         themeSource={state.themeSource}
         userEmail={user?.email ?? 'Guest'}

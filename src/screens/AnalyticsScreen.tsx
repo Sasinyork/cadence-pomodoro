@@ -25,7 +25,6 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
 
   const hourMax = Math.max(...a.hourDistribution, 1);
 
-  // Find the peak focus hour for the subtitle
   const peakHour = a.hourDistribution.indexOf(Math.max(...a.hourDistribution));
   const peakLabel = peakHour === 0 ? '12 AM'
     : peakHour < 12 ? `${peakHour} AM`
@@ -33,26 +32,14 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
     : `${peakHour - 12} PM`;
 
   const kpis = [
-    {
-      label: 'Total focus time',
-      value: a.totalFocusSecs > 0 ? fmtDuration(a.totalFocusSecs) : '—',
-    },
-    {
-      label: 'Sessions today',
-      value: String(a.todaySessions),
-    },
-    {
-      label: 'Current streak',
-      value: a.streak > 0 ? `${a.streak}d` : '—',
-    },
-    {
-      label: 'Avg session',
-      value: a.avgSessionSecs > 0 ? fmtDuration(a.avgSessionSecs) : '—',
-    },
+    { label: 'Total focus time', value: a.totalFocusSecs > 0 ? fmtDuration(a.totalFocusSecs) : '—' },
+    { label: 'Sessions today',   value: String(a.todaySessions) },
+    { label: 'Current streak',   value: a.streak > 0 ? `${a.streak}d` : '—' },
+    { label: 'Avg session',      value: a.avgSessionSecs > 0 ? fmtDuration(a.avgSessionSecs) : '—' },
   ];
 
   return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <main className="screen-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}`, flexShrink: 0 }}>
         <div>
@@ -67,11 +54,16 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
       <div style={{ flex: 1, padding: 28, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 22 }}>
         {/* KPI row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-          {kpis.map((k) => (
-            <div key={k.label} style={{
-              background: t.surface, border: `1px solid ${t.borderSoft}`,
-              borderRadius: 12, padding: 18,
-            }}>
+          {kpis.map((k, i) => (
+            <div
+              key={k.label}
+              className="kpi-card card-enter"
+              style={{
+                background: t.surface, border: `1px solid ${t.borderSoft}`,
+                borderRadius: 12, padding: 18,
+                animationDelay: `${i * 0.06}s`, animationFillMode: 'both',
+              }}
+            >
               <div style={{ fontSize: 10.5, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 8 }}>{k.label}</div>
               <div style={{ fontSize: 26, fontWeight: 700, color: t.text, fontFamily: '"JetBrains Mono", monospace', letterSpacing: -1, lineHeight: 1 }}>{k.value}</div>
             </div>
@@ -80,13 +72,24 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
 
         {/* Charts row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
-          <WeeklyChart theme={t} accent={accent} data={a.weekFocus} totalSecs={a.weekTotalSecs} />
-          <HeatmapCard theme={t} accent={accent} data={a.heatmap} totalSessions={a.heatmapTotal} totalFocusSecs={a.totalFocusSecs} />
+          <div className="card-enter" style={{ animationDelay: '0.12s', animationFillMode: 'both' }}>
+            <WeeklyChart theme={t} accent={accent} data={a.weekFocus} totalSecs={a.weekTotalSecs} />
+          </div>
+          <div className="card-enter" style={{ animationDelay: '0.16s', animationFillMode: 'both' }}>
+            <HeatmapCard theme={t} accent={accent} data={a.heatmap} totalSessions={a.heatmapTotal} totalFocusSecs={a.totalFocusSecs} />
+          </div>
         </div>
 
         {/* Hour distribution + tag breakdown */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
-          <div style={{ background: t.surface, border: `1px solid ${t.borderSoft}`, borderRadius: 12, padding: '20px 22px' }}>
+          <div
+            className="card-enter"
+            style={{
+              background: t.surface, border: `1px solid ${t.borderSoft}`,
+              borderRadius: 12, padding: '20px 22px',
+              animationDelay: '0.2s', animationFillMode: 'both',
+            }}
+          >
             <div style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase' }}>Best hours</div>
               <div style={{ fontSize: 13, color: t.textFaint, marginTop: 3 }}>
@@ -97,12 +100,17 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 100 }}>
               {a.hourDistribution.map((v, i) => (
-                <div key={i} style={{
-                  flex: 1,
-                  height: Math.max(2, (v / hourMax) * 90),
-                  background: v >= hourMax * 0.75 ? accent : alpha(accent, 0.3 + (v / hourMax) * 0.4),
-                  borderRadius: '2px 2px 0 0',
-                }} />
+                <div
+                  key={i}
+                  className="bar-grow"
+                  style={{
+                    flex: 1,
+                    height: Math.max(2, (v / hourMax) * 90),
+                    background: v >= hourMax * 0.75 ? accent : alpha(accent, 0.3 + (v / hourMax) * 0.4),
+                    borderRadius: '2px 2px 0 0',
+                    animationDelay: `${0.2 + i * 0.012}s`,
+                  }}
+                />
               ))}
             </div>
             <div style={{ display: 'flex', marginTop: 8, fontSize: 10, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
@@ -112,7 +120,14 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
             </div>
           </div>
 
-          <div style={{ background: t.surface, border: `1px solid ${t.borderSoft}`, borderRadius: 12, padding: '20px 22px' }}>
+          <div
+            className="card-enter"
+            style={{
+              background: t.surface, border: `1px solid ${t.borderSoft}`,
+              borderRadius: 12, padding: '20px 22px',
+              animationDelay: '0.24s', animationFillMode: 'both',
+            }}
+          >
             <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 16 }}>Time by tag</div>
             {a.timeByTag.length > 0 ? a.timeByTag.map((row, i) => (
               <div key={row.tag} style={{ marginBottom: i === a.timeByTag.length - 1 ? 0 : 12 }}>
@@ -123,7 +138,12 @@ export function AnalyticsScreen({ theme: t, accent }: AnalyticsScreenProps) {
                   </span>
                 </div>
                 <div style={{ height: 6, borderRadius: 3, background: t.borderSoft, overflow: 'hidden' }}>
-                  <div style={{ width: `${row.pct}%`, height: '100%', background: alpha(accent, 0.3 + (row.pct / 100) * 0.7), borderRadius: 3 }} />
+                  <div style={{
+                    width: `${row.pct}%`, height: '100%',
+                    background: alpha(accent, 0.3 + (row.pct / 100) * 0.7),
+                    borderRadius: 3,
+                    transition: 'width 0.6s cubic-bezier(0.22,1,0.36,1)',
+                  }} />
                 </div>
               </div>
             )) : (

@@ -47,5 +47,6 @@ export const Icons = {
   inbox:   (p: IconProps) => <Icon {...p} d={<><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5l-3 7v6a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2v-6l-3-7a2 2 0 0 0-1.8-1.2H7.3A2 2 0 0 0 5.5 5z"/></>} />,
   minus:   (p: IconProps) => <Icon {...p} d={<path d="M5 12h14"/>} />,
   trash:   (p: IconProps) => <Icon {...p} d={<><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></>} />,
+  edit:    (p: IconProps) => <Icon {...p} d={<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></>} />,
   logout:  (p: IconProps) => <Icon {...p} d={<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>} />,
 };

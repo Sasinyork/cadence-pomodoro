@@ -9,15 +9,17 @@ interface TaskFormModalProps {
   accent: string;
   onClose: () => void;
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) => void;
+  initialTask?: Task;
   startNow?: boolean;
 }
 
-export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = false }: TaskFormModalProps) {
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [priority, setPriority] = useState<Priority>('medium');
-  const [total, setTotal] = useState(4);
-  const [tags, setTags] = useState('');
+export function TaskFormModal({ theme: t, accent, onClose, onSubmit, initialTask, startNow = false }: TaskFormModalProps) {
+  const isEdit = Boolean(initialTask);
+  const [title, setTitle] = useState(initialTask?.title ?? '');
+  const [desc, setDesc] = useState(initialTask?.desc ?? '');
+  const [priority, setPriority] = useState<Priority>(initialTask?.priority ?? 'medium');
+  const [total, setTotal] = useState(initialTask?.total ?? 4);
+  const [tags, setTags] = useState(initialTask?.tags.join(', ') ?? '');
   const [doStart, setDoStart] = useState(startNow);
   const [titleError, setTitleError] = useState('');
 
@@ -41,6 +43,7 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = 
       role="dialog"
       aria-modal="true"
       aria-labelledby="task-modal-title"
+      className="modal-enter"
       style={{
         width: 520, background: t.surface, border: `1px solid ${t.borderSoft}`,
         borderRadius: 16, boxShadow: t.shadowLift, overflow: 'hidden',
@@ -49,8 +52,8 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = 
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: `1px solid ${t.borderSoft}` }}>
         <div>
-          <div style={{ fontSize: 11, color: accent, fontWeight: 600, letterSpacing: 1, fontFamily: '"JetBrains Mono", monospace' }}>NEW TASK</div>
-          <div id="task-modal-title" style={{ fontSize: 18, fontWeight: 600, color: t.text, letterSpacing: -0.3, marginTop: 2 }}>Plan something worth focusing on</div>
+          <div style={{ fontSize: 11, color: accent, fontWeight: 600, letterSpacing: 1, fontFamily: '"JetBrains Mono", monospace' }}>{isEdit ? 'EDIT TASK' : 'NEW TASK'}</div>
+          <div id="task-modal-title" style={{ fontSize: 18, fontWeight: 600, color: t.text, letterSpacing: -0.3, marginTop: 2 }}>{isEdit ? 'Update your task' : 'Plan something worth focusing on'}</div>
         </div>
         <IconBtn theme={t} icon={<Icons.x size={16} />} accent={accent} onClick={onClose} label="Close modal" />
       </div>
@@ -79,6 +82,7 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = 
                 return (
                   <button
                     key={p} type="button"
+                    className="priority-btn"
                     onClick={() => setPriority(p)}
                     style={{
                       flex: 1, padding: '8px 10px', borderRadius: 8,
@@ -108,19 +112,21 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = 
           value={tags} onChange={(e) => setTags(e.target.value)}
         />
 
-        {/* start now toggle */}
-        <div style={{
-          padding: '12px 14px', borderRadius: 8,
-          background: alpha(accent, 0.06), border: `1px solid ${alpha(accent, 0.18)}`,
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <Icons.zap size={14} color={accent} style={{ marginTop: 2, flexShrink: 0 }} />
-          <div style={{ fontSize: 12.5, color: t.text, lineHeight: 1.5, flex: 1 }}>
-            <span style={{ fontWeight: 600 }}>Start now after creating?</span>{' '}
-            <span style={{ color: t.textMuted }}>The timer will begin counting toward this task immediately.</span>
+        {/* start now toggle — only for new tasks */}
+        {!isEdit && (
+          <div style={{
+            padding: '12px 14px', borderRadius: 8,
+            background: alpha(accent, 0.06), border: `1px solid ${alpha(accent, 0.18)}`,
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <Icons.zap size={14} color={accent} style={{ marginTop: 2, flexShrink: 0 }} />
+            <div style={{ fontSize: 12.5, color: t.text, lineHeight: 1.5, flex: 1 }}>
+              <span style={{ fontWeight: 600 }}>Start now after creating?</span>{' '}
+              <span style={{ color: t.textMuted }}>The timer will begin counting toward this task immediately.</span>
+            </div>
+            <Toggle theme={t} on={doStart} accent={accent} label="" onChange={setDoStart} />
           </div>
-          <Toggle theme={t} on={doStart} accent={accent} label="" onChange={setDoStart} />
-        </div>
+        )}
 
         {/* pomodoro preview */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -132,7 +138,7 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, startNow = 
       {/* footer */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 24px', borderTop: `1px solid ${t.borderSoft}`, background: t.surfaceAlt }}>
         <Btn theme={t} accent={accent} variant="ghost" onClick={onClose}>Cancel</Btn>
-        <Btn theme={t} accent={accent} variant="primary" icon={<Icons.plus size={14} />} onClick={handleSubmit}>Create task</Btn>
+        <Btn theme={t} accent={accent} variant="primary" icon={isEdit ? undefined : <Icons.plus size={14} />} onClick={handleSubmit}>{isEdit ? 'Save changes' : 'Create task'}</Btn>
       </div>
     </div>
   );

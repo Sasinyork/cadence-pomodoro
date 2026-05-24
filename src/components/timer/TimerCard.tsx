@@ -41,7 +41,7 @@ export function TimerCard({
   const [mins, secs] = formatTime(secondsLeft).split(':');
 
   return (
-    <div style={{
+    <div className="card-enter" style={{
       background: t.surface, border: `1px solid ${t.borderSoft}`,
       borderRadius: 16, padding: '32px 36px 28px',
       boxShadow: t.shadow, position: 'relative', overflow: 'hidden',

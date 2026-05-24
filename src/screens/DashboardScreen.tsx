@@ -6,6 +6,7 @@ import { Icons } from '../components/icons';
 import { TimerCard } from '../components/timer/TimerCard';
 import { TaskCard } from '../components/tasks/TaskCard';
 import { TaskFormModal } from '../components/tasks/TaskFormModal';
+import { HistoryPanel } from '../components/tasks/HistoryPanel';
 import { StreakCard } from '../components/analytics/StreakCard';
 import { TodayStats } from '../components/analytics/TodayStats';
 import { HeatmapCard } from '../components/analytics/HeatmapCard';
@@ -15,9 +16,11 @@ import { useAnalytics } from '../hooks/useAnalytics';
 
 export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; accent: string }) {
   const { state, dispatch, startTimer, pauseTimer, resetTimer, skipSession } = useApp();
+  const isTasksView = state.currentScreen === 'tasks';
   const analytics = useAnalytics(state.tasks, state.todaySessions);
   const [showModal, setShowModal] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'today' | 'high'>('all');
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [filter, setFilter] = useState<'all' | 'high'>('all');
 
   const activeTask = state.tasks.find((t) => t.id === state.activeTaskId) ?? null;
 
@@ -28,10 +31,8 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
   })();
 
   const filteredTasks = state.tasks.filter((task) => {
-    if (filter === 'all') return !task.completed;
-    if (filter === 'today') return !task.completed; // simplified: show all active
     if (filter === 'high') return task.priority === 'high' && !task.completed;
-    return true;
+    return !task.completed;
   });
   const completedTasks = state.tasks.filter((t) => t.completed);
 
@@ -40,50 +41,50 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
     dispatch({ type: 'ADD_TASK', task: { ...data, id, createdAt: Date.now(), active: false, done: 0, completed: false } });
   }
 
+  function handleEditTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) {
+    if (!editingTask) return;
+    dispatch({ type: 'UPDATE_TASK', task: { ...editingTask, ...data, done: Math.min(editingTask.done, data.total) } });
+    setEditingTask(null);
+  }
+
   const upNext = state.tasks.filter((t) => !t.active && !t.completed).slice(0, 2);
 
   return (
     <>
       {/* Main column */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <main className="screen-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}`, flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 22, fontWeight: 600, color: t.text, letterSpacing: -0.4 }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long' })} focus
+              {isTasksView ? 'Tasks' : `${new Date().toLocaleDateString('en-US', { weekday: 'long' })} focus`}
             </div>
             <div style={{ fontSize: 13, color: t.textMuted, marginTop: 2 }}>
-              {state.todaySessions} sessions in · keep the momentum
+              {isTasksView
+                ? `${state.tasks.filter(t => !t.completed).length} open · ${state.tasks.filter(t => t.completed).length} completed`
+                : `${state.todaySessions} sessions in · keep the momentum`}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: t.surface, border: `1px solid ${t.border}`,
-              borderRadius: 8, padding: '7px 12px', minWidth: 200,
-            }}>
-              <Icons.search size={14} color={t.textFaint} />
-              <span style={{ fontSize: 13, color: t.textFaint }}>Search tasks</span>
-            </div>
-            <Btn theme={t} accent={accent} variant="primary" icon={<Icons.plus size={14} />} onClick={() => setShowModal(true)}>New task</Btn>
-          </div>
+          <Btn theme={t} accent={accent} variant="primary" icon={<Icons.plus size={14} />} onClick={() => setShowModal(true)}>New task</Btn>
         </div>
 
         <div style={{ flex: 1, padding: 28, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 22 }}>
-          <TimerCard
-            theme={t} accent={accent} mode={state.mode}
-            timerState={state.timerState}
-            secondsLeft={state.secondsLeft}
-            totalSecs={totalSecs}
-            timerStyle={state.timerStyle}
-            sessionCount={state.sessionCount}
-            totalSessions={state.settings.longBreakAfter}
-            linkedTask={activeTask}
-            onStart={startTimer}
-            onPause={pauseTimer}
-            onReset={resetTimer}
-            onSkip={skipSession}
-          />
+          {!isTasksView && (
+            <TimerCard
+              theme={t} accent={accent} mode={state.mode}
+              timerState={state.timerState}
+              secondsLeft={state.secondsLeft}
+              totalSecs={totalSecs}
+              timerStyle={state.timerStyle}
+              sessionCount={state.sessionCount}
+              totalSessions={state.settings.longBreakAfter}
+              linkedTask={activeTask}
+              onStart={startTimer}
+              onPause={pauseTimer}
+              onReset={resetTimer}
+              onSkip={skipSession}
+            />
+          )}
 
           {/* Task list */}
           <section>
@@ -95,34 +96,49 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 4 }}>
-                {(['all', 'today', 'high'] as const).map((f) => (
-                  <button key={f} onClick={() => setFilter(f)} style={{
-                    padding: '5px 11px', borderRadius: 7, fontSize: 12, fontWeight: 500,
-                    background: filter === f ? alpha(accent, 0.1) : 'transparent',
-                    color: filter === f ? accent : t.textMuted,
-                    border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                    textTransform: 'capitalize',
-                  }}>{f === 'all' ? 'All' : f === 'today' ? 'Today' : 'High'}</button>
+                {(['all', 'high'] as const).map((f) => (
+                  <button
+                    key={f}
+                    className="filter-btn"
+                    onClick={() => setFilter(f)}
+                    style={{
+                      padding: '5px 11px', borderRadius: 7, fontSize: 12, fontWeight: 500,
+                      background: filter === f ? alpha(accent, 0.1) : 'transparent',
+                      color: filter === f ? accent : t.textMuted,
+                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                      textTransform: 'capitalize',
+                    }}
+                  >{f === 'all' ? 'All' : 'High priority'}</button>
                 ))}
               </div>
             </div>
 
             {filteredTasks.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {filteredTasks.map((task) => (
-                  <TaskCard
-                    key={task.id} task={task} theme={t} accent={accent}
-                    onToggleComplete={(id) => dispatch({ type: 'TOGGLE_TASK_COMPLETE', id })}
-                    onSetActive={(id) => dispatch({ type: 'SET_ACTIVE_TASK', id })}
-                    onDelete={(id) => dispatch({ type: 'DELETE_TASK', id })}
-                  />
+                {filteredTasks.map((task, i) => (
+                  <div
+                    key={task.id}
+                    className="card-enter"
+                    style={{ animationDelay: `${i * 0.04}s`, animationFillMode: 'both' }}
+                  >
+                    <TaskCard
+                      task={task} theme={t} accent={accent}
+                      onToggleComplete={(id) => dispatch({ type: 'TOGGLE_TASK_COMPLETE', id })}
+                      onSetActive={(id) => dispatch({ type: 'SET_ACTIVE_TASK', id })}
+                      onDelete={(id) => dispatch({ type: 'DELETE_TASK', id })}
+                      onEdit={(id) => setEditingTask(state.tasks.find((t) => t.id === id) ?? null)}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div style={{
-                padding: '60px 24px', textAlign: 'center', borderRadius: 12,
-                border: `1.5px dashed ${t.border}`, background: 'transparent',
-              }}>
+              <div
+                className="card-enter"
+                style={{
+                  padding: '60px 24px', textAlign: 'center', borderRadius: 12,
+                  border: `1.5px dashed ${t.border}`, background: 'transparent',
+                }}
+              >
                 <div style={{
                   width: 48, height: 48, borderRadius: 12, margin: '0 auto 16px',
                   background: alpha(accent, 0.1), color: accent,
@@ -134,6 +150,17 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
               </div>
             )}
           </section>
+
+          <HistoryPanel
+            theme={t} accent={accent}
+            completedTasks={state.tasks.filter((t) => t.completed)}
+            deletedTasks={state.deletedTasks}
+            onReopen={(id) => dispatch({ type: 'TOGGLE_TASK_COMPLETE', id })}
+            onRestore={(id) => dispatch({ type: 'RESTORE_TASK', id })}
+            onRemoveCompleted={(id) => dispatch({ type: 'DELETE_TASK', id })}
+            onRemoveDeleted={(id) => dispatch({ type: 'REMOVE_FROM_HISTORY', id })}
+            onClearAll={() => dispatch({ type: 'CLEAR_HISTORY' })}
+          />
         </div>
       </main>
 
@@ -153,7 +180,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
         />
         {/* Up next */}
         {upNext.length > 0 && (
-          <div style={{
+          <div className="card-enter" style={{
             background: t.surface, border: `1px solid ${t.borderSoft}`,
             borderRadius: 12, padding: 18,
           }}>
@@ -175,7 +202,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
         )}
       </aside>
 
-      {/* Task form modal */}
+      {/* Task form modal — create */}
       {showModal && (
         <div
           style={{
@@ -184,6 +211,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
             backdropFilter: 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 50,
+            animation: 'fadeIn 0.2s ease both',
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
@@ -191,6 +219,28 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
             theme={t} accent={accent}
             onClose={() => setShowModal(false)}
             onSubmit={handleAddTask}
+          />
+        </div>
+      )}
+
+      {/* Task form modal — edit */}
+      {editingTask && (
+        <div
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(10, 10, 10, 0.55)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 50,
+            animation: 'fadeIn 0.2s ease both',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingTask(null); }}
+        >
+          <TaskFormModal
+            theme={t} accent={accent}
+            onClose={() => setEditingTask(null)}
+            onSubmit={handleEditTask}
+            initialTask={editingTask}
           />
         </div>
       )}

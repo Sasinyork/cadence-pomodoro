@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import type { AppState, Task, Settings, Mode, Theme, ThemeSource, Palette, TimerStyle, TimerState } from '../types';
+import type { AppState, Task, DeletedTask, Settings, Mode, Theme, ThemeSource, Palette, TimerStyle, TimerState } from '../types';
 import { MODES } from '../lib/tokens';
 
 const DEFAULT_SETTINGS: Settings = {
@@ -41,6 +41,7 @@ function getInitialState(): AppState {
         sessionCount: parsed.sessionCount ?? 1,
         activeTaskId: parsed.activeTaskId ?? null,
         tasks: [],
+        deletedTasks: parsed.deletedTasks ?? [],
         settings: { ...DEFAULT_SETTINGS, ...(parsed.settings ?? {}) },
         streak: 0,
         todaySessions: 0,
@@ -61,6 +62,7 @@ function getInitialState(): AppState {
     sessionCount: 1,
     activeTaskId: null,
     tasks: [],
+    deletedTasks: [],
     settings: DEFAULT_SETTINGS,
     streak: 0,
     todaySessions: 0,
@@ -84,9 +86,12 @@ type Action =
   | { type: 'UPDATE_TASK'; task: Task }
   | { type: 'DELETE_TASK'; id: string }
   | { type: 'TOGGLE_TASK_COMPLETE'; id: string }
+  | { type: 'RESTORE_TASK'; id: string }
+  | { type: 'REMOVE_FROM_HISTORY'; id: string }
+  | { type: 'CLEAR_HISTORY' }
   | { type: 'UPDATE_SETTINGS'; settings: Partial<Settings> }
   | { type: 'RESET_SETTINGS' }
-  | { type: 'LOAD_FROM_DB'; tasks: Task[]; streak: number; todaySessions: number; prefs: Partial<{ themeSource: ThemeSource; palette: Palette; timerStyle: TimerStyle; settings: Settings }> };
+  | { type: 'LOAD_FROM_DB'; tasks: Task[]; deletedTasks: DeletedTask[]; streak: number; todaySessions: number; prefs: Partial<{ themeSource: ThemeSource; palette: Palette; timerStyle: TimerStyle; settings: Settings }> };
 
 function secsForMode(mode: Mode, settings: Settings): number {
   if (mode === 'focus') return settings.pomodoroMins * 60;
@@ -125,7 +130,8 @@ function reducer(state: AppState, action: Action): AppState {
         ? state.tasks.map((t) => {
             if (t.id === state.activeTaskId && t.done < t.total) {
               const newDone = t.done + 1;
-              return { ...t, done: newDone, completed: newDone >= t.total };
+              const nowComplete = newDone >= t.total;
+              return { ...t, done: newDone, completed: nowComplete, completedAt: nowComplete ? Date.now() : t.completedAt };
             }
             return t;
           })
@@ -156,18 +162,43 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, tasks: [action.task, ...state.tasks] };
     case 'UPDATE_TASK':
       return { ...state, tasks: state.tasks.map((t) => t.id === action.task.id ? action.task : t) };
-    case 'DELETE_TASK':
+    case 'DELETE_TASK': {
+      const target = state.tasks.find((t) => t.id === action.id);
+      const archived: DeletedTask[] = target
+        ? [{ ...target, deletedAt: Date.now() }, ...state.deletedTasks].slice(0, 50)
+        : state.deletedTasks;
       return {
         ...state,
         tasks: state.tasks.filter((t) => t.id !== action.id),
+        deletedTasks: archived,
         activeTaskId: state.activeTaskId === action.id ? null : state.activeTaskId,
       };
-    case 'TOGGLE_TASK_COMPLETE':
+    }
+    case 'TOGGLE_TASK_COMPLETE': {
+      const toggled = state.tasks.map((t) => {
+        if (t.id !== action.id) return t;
+        const nowComplete = !t.completed;
+        return { ...t, completed: nowComplete, completedAt: nowComplete ? Date.now() : undefined };
+      });
+      return { ...state, tasks: toggled };
+    }
+    case 'RESTORE_TASK': {
+      const entry = state.deletedTasks.find((t) => t.id === action.id);
+      if (!entry) return state;
+      const { deletedAt: _d, ...restored } = entry;
       return {
         ...state,
-        tasks: state.tasks.map((t) =>
-          t.id === action.id ? { ...t, completed: !t.completed } : t
-        ),
+        tasks: [{ ...restored, completed: false, active: false, completedAt: undefined }, ...state.tasks],
+        deletedTasks: state.deletedTasks.filter((t) => t.id !== action.id),
+      };
+    }
+    case 'REMOVE_FROM_HISTORY':
+      return { ...state, deletedTasks: state.deletedTasks.filter((t) => t.id !== action.id) };
+    case 'CLEAR_HISTORY':
+      return {
+        ...state,
+        tasks: state.tasks.filter((t) => !t.completed),
+        deletedTasks: [],
       };
     case 'UPDATE_SETTINGS': {
       const ns = { ...state.settings, ...action.settings };
@@ -185,6 +216,7 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         tasks: action.tasks,
+        deletedTasks: action.deletedTasks,
         themeSource: src,
         theme: resolvedTheme,
         palette: p.palette ?? state.palette,
@@ -273,6 +305,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         palette: state.palette,
         timerStyle: state.timerStyle,
         tasks: state.tasks,
+        deletedTasks: state.deletedTasks,
         settings: state.settings,
         streak: state.streak,
         todaySessions: state.todaySessions,
@@ -281,7 +314,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       localStorage.setItem('cadence-state', JSON.stringify(toSave));
     }, 500);
-  }, [state.theme, state.palette, state.timerStyle, state.tasks, state.settings, state.streak, state.todaySessions, state.sessionCount, state.activeTaskId]);
+  }, [state.theme, state.palette, state.timerStyle, state.tasks, state.deletedTasks, state.settings, state.streak, state.todaySessions, state.sessionCount, state.activeTaskId]);
 
   const startTimer = useCallback(() => dispatch({ type: 'SET_TIMER_STATE', state: 'running' }), []);
   const pauseTimer = useCallback(() => dispatch({ type: 'SET_TIMER_STATE', state: 'paused' }), []);

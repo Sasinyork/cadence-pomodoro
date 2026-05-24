@@ -5,15 +5,16 @@ A focused productivity app built with React, TypeScript, and Supabase. Combines 
 ## Features
 
 - **Pomodoro timer** — focus / short break / long break modes with configurable durations, auto-start, and progress visualization (bars or ring style)
-- **Task manager** — add tasks with priority, tags, and pomodoro targets; track progress per task
+- **Task manager** — add, edit, and prioritize tasks with tags and pomodoro targets; track per-task progress
+- **Task history** — completed and deleted tasks are preserved in a history panel; restore or permanently remove entries; auto-expires after 30 days
 - **Session analytics** — weekly focus chart, activity heatmap, hour distribution, time by tag — all computed from real session history
 - **Streak tracking** — consecutive-day streaks derived from your focus session log
-- **Cloud sync** — tasks, preferences, and session history stored in Supabase; syncs across devices
+- **Cloud sync** — tasks, deleted task history, preferences, and session data stored in Supabase; syncs across devices
 - **Auth** — passwordless magic-link sign-in via email (no password required)
+- **Guest mode** — try the app without signing in; data stored locally
 - **Theming** — light / dark / system modes with four color palettes (Classic, Sunset, Forest, Candy)
 - **Responsive** — dedicated mobile layout with tab navigation
 - **Browser notifications** — session-complete alerts (with permission prompt)
-- **Ambient sound** — chime on session completion via Web Audio API
 
 ## Tech stack
 
@@ -73,7 +74,7 @@ src/
 ├── components/
 │   ├── analytics/      # StreakCard, TodayStats, WeeklyChart, HeatmapCard
 │   ├── layout/         # Sidebar, MobileTabBar
-│   ├── tasks/          # TaskCard, TaskFormModal
+│   ├── tasks/          # TaskCard, TaskFormModal, HistoryPanel
 │   ├── timer/          # TimerCard
 │   └── ui/             # Btn, PriorityDot, shared primitives
 ├── context/
@@ -100,9 +101,10 @@ supabase/
 
 ## Database schema
 
-Three tables, all protected by Row Level Security (users can only access their own rows):
+Four tables, all protected by Row Level Security (users can only access their own rows):
 
 - **`tasks`** — task records with title, priority, tags, pomodoro progress
+- **`deleted_tasks`** — archived deleted tasks with a 30-day TTL; purged automatically on login
 - **`user_preferences`** — theme, palette, timer style, settings per user
 - **`focus_sessions`** — log of every completed pomodoro with duration and linked task
 

@@ -17,6 +17,11 @@ export interface Task {
   completed: boolean;
   active: boolean;
   createdAt: number;
+  completedAt?: number;
+}
+
+export interface DeletedTask extends Task {
+  deletedAt: number;
 }
 
 export interface Settings {
@@ -43,6 +48,7 @@ export interface AppState {
   sessionCount: number;
   activeTaskId: string | null;
   tasks: Task[];
+  deletedTasks: DeletedTask[];
   settings: Settings;
   streak: number;
   todaySessions: number;

@@ -68,3 +68,31 @@ create policy "sessions: owner access"
 create index if not exists tasks_user_id_idx           on tasks (user_id);
 create index if not exists focus_sessions_user_id_idx  on focus_sessions (user_id);
 create index if not exists focus_sessions_completed_idx on focus_sessions (user_id, completed_at desc);
+
+-- ── deleted_tasks ────────────────────────────────────────────
+create table if not exists deleted_tasks (
+  id           uuid        primary key,
+  user_id      uuid        references auth.users(id) on delete cascade not null,
+  title        text        not null,
+  description  text        default '',
+  priority     text        default 'medium',
+  tags         text[]      default '{}',
+  done         integer     default 0,
+  total        integer     default 1,
+  completed    boolean     default false,
+  active       boolean     default false,
+  created_at   timestamptz not null,
+  completed_at timestamptz,
+  deleted_at   timestamptz not null default now(),
+  expires_at   timestamptz not null
+);
+
+alter table deleted_tasks enable row level security;
+
+create policy "deleted_tasks: owner access"
+  on deleted_tasks for all
+  using  (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists deleted_tasks_user_id_idx  on deleted_tasks (user_id);
+create index if not exists deleted_tasks_expires_idx  on deleted_tasks (user_id, expires_at);

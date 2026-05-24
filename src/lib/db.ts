@@ -1,6 +1,8 @@
 // Database operations — all queries go through here, never directly in components.
 import { supabase } from './supabase';
-import type { Task, Settings, ThemeSource, Palette, TimerStyle } from '../types';
+import type { Task, DeletedTask, Settings, ThemeSource, Palette, TimerStyle } from '../types';
+
+const DELETED_TASK_TTL_DAYS = 30;
 
 // ── Types that mirror the DB rows ────────────────────────────────────────
 
@@ -16,6 +18,12 @@ interface DbTask {
   completed: boolean;
   active: boolean;
   created_at: string;
+}
+
+interface DbDeletedTask extends DbTask {
+  completed_at: string | null;
+  deleted_at: string;
+  expires_at: string;
 }
 
 interface DbPrefs {
@@ -100,6 +108,85 @@ export async function deleteTask(id: string, userId: string): Promise<void> {
     .eq('id', id)
     .eq('user_id', userId);
 
+  if (error) throw error;
+}
+
+// ── Deleted tasks ────────────────────────────────────────────────────────
+
+function dbDeletedTaskToDeletedTask(row: DbDeletedTask): DeletedTask {
+  return {
+    id: row.id,
+    title: row.title,
+    desc: row.description,
+    priority: row.priority as Task['priority'],
+    tags: row.tags ?? [],
+    done: row.done,
+    total: row.total,
+    completed: row.completed,
+    active: row.active,
+    createdAt: new Date(row.created_at).getTime(),
+    completedAt: row.completed_at ? new Date(row.completed_at).getTime() : undefined,
+    deletedAt: new Date(row.deleted_at).getTime(),
+  };
+}
+
+export async function fetchDeletedTasks(userId: string): Promise<DeletedTask[]> {
+  const { data, error } = await supabase
+    .from('deleted_tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .gt('expires_at', new Date().toISOString())
+    .order('deleted_at', { ascending: false });
+  if (error) throw error;
+  return (data as DbDeletedTask[]).map(dbDeletedTaskToDeletedTask);
+}
+
+export async function insertDeletedTask(task: DeletedTask, userId: string): Promise<void> {
+  const expiresAt = new Date(task.deletedAt + DELETED_TASK_TTL_DAYS * 86_400_000).toISOString();
+  const { error } = await supabase
+    .from('deleted_tasks')
+    .upsert({
+      id: task.id,
+      user_id: userId,
+      title: task.title,
+      description: task.desc,
+      priority: task.priority,
+      tags: task.tags,
+      done: task.done,
+      total: task.total,
+      completed: task.completed,
+      active: task.active,
+      created_at: new Date(task.createdAt).toISOString(),
+      completed_at: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+      deleted_at: new Date(task.deletedAt).toISOString(),
+      expires_at: expiresAt,
+    }, { onConflict: 'id' });
+  if (error) throw error;
+}
+
+export async function removeDeletedTask(id: string, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('deleted_tasks')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function clearAllDeletedTasks(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('deleted_tasks')
+    .delete()
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function purgeExpiredDeletedTasks(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('deleted_tasks')
+    .delete()
+    .eq('user_id', userId)
+    .lt('expires_at', new Date().toISOString());
   if (error) throw error;
 }
 

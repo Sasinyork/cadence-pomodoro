@@ -2,8 +2,8 @@
 // AppContext itself stays unaware of Supabase — this hook bridges them.
 import { useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchTasks, fetchPrefs, fetchSessionDates, insertTask, updateTask, deleteTask, upsertPrefs, insertSession } from '../lib/db';
-import type { Task } from '../types';
+import { fetchTasks, fetchPrefs, fetchSessionDates, insertTask, updateTask, deleteTask, upsertPrefs, insertSession, fetchDeletedTasks, insertDeletedTask, removeDeletedTask, purgeExpiredDeletedTasks } from '../lib/db';
+import type { Task, DeletedTask } from '../types';
 
 export function useDbSync(userId: string | null) {
   const { state, dispatch } = useApp();
@@ -14,8 +14,10 @@ export function useDbSync(userId: string | null) {
 
     (async () => {
       try {
-        const [tasks, prefs, sessionDates] = await Promise.all([
+        await purgeExpiredDeletedTasks(userId);
+        const [tasks, deletedTasks, prefs, sessionDates] = await Promise.all([
           fetchTasks(userId),
+          fetchDeletedTasks(userId),
           fetchPrefs(userId),
           fetchSessionDates(userId),
         ]);
@@ -35,6 +37,7 @@ export function useDbSync(userId: string | null) {
         dispatch({
           type: 'LOAD_FROM_DB',
           tasks,
+          deletedTasks,
           streak,
           todaySessions,
           prefs: prefs ? {
@@ -44,18 +47,19 @@ export function useDbSync(userId: string | null) {
             settings:    prefs.settings,
           } : {},
         });
-        // Seed prevTasksRef with what came from DB so the sync
-        // effect doesn't treat these as new inserts.
+        // Seed refs so the sync effects don't treat loaded data as new inserts.
         prevTasksRef.current = tasks;
+        prevDeletedTasksRef.current = deletedTasks;
       } catch (err) {
         console.error('[DbSync] Failed to load from Supabase:', err);
       }
     })();
   }, [userId]);
 
-  // ── Track previous tasks so we can detect adds/updates/deletes ────────
+  // ── Track previous state so we can detect adds/updates/deletes ───────
   // Initialized to null so we can skip the first run after LOAD_FROM_DB.
   const prevTasksRef = useRef<Task[] | null>(null);
+  const prevDeletedTasksRef = useRef<DeletedTask[] | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -90,6 +94,26 @@ export function useDbSync(userId: string | null) {
       }
     }
   }, [state.tasks, userId]);
+
+  // ── Sync deleted tasks history ────────────────────────────────────────
+  useEffect(() => {
+    if (!userId) return;
+    if (prevDeletedTasksRef.current === null) return;
+
+    const prev = prevDeletedTasksRef.current;
+    const curr = state.deletedTasks;
+    prevDeletedTasksRef.current = curr;
+
+    const prevIds = new Set(prev.map((t) => t.id));
+    const currIds = new Set(curr.map((t) => t.id));
+
+    for (const t of prev) {
+      if (!currIds.has(t.id)) removeDeletedTask(t.id, userId).catch(console.error);
+    }
+    for (const t of curr) {
+      if (!prevIds.has(t.id)) insertDeletedTask(t, userId).catch(console.error);
+    }
+  }, [state.deletedTasks, userId]);
 
   // ── Debounced preferences sync ─────────────────────────────────────────
   const prefsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
