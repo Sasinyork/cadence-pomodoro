@@ -72,6 +72,19 @@ export function SettingsScreen({ theme: t, accent }: SettingsScreenProps) {
               control={<NumberStepper theme={t} accent={accent} value={s.longBreakAfter} unit="cycles" min={2} max={8} onChange={(v) => update('longBreakAfter', v)} />} />
           </Section>
 
+          <Section t={t} title="Goals" hint="Targets shown on your daily stats card." delay={0.06}>
+            <Row t={t} label="Daily focus goal" hint="Total focus time to aim for each day"
+              control={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <NumberStepper theme={t} accent={accent} value={s.dailyGoalMins} unit="min" min={25} max={480} step={25} width={130} onChange={(v) => update('dailyGoalMins', v)} />
+                  <span style={{ fontSize: 12, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace', minWidth: 32 }}>
+                    {s.dailyGoalMins >= 60 ? `${Math.floor(s.dailyGoalMins / 60)}h${s.dailyGoalMins % 60 > 0 ? ` ${s.dailyGoalMins % 60}m` : ''}` : `${s.dailyGoalMins}m`}
+                  </span>
+                </div>
+              }
+            />
+          </Section>
+
           <Section t={t} title="Automation" hint="Let sessions flow without manual restarts." delay={0.08}>
             <Row t={t} label="Auto-start breaks" hint="Begin a break as soon as a pomodoro ends"
               control={<Toggle theme={t} on={s.autoStartBreaks} accent={accent} label="" onChange={(v) => update('autoStartBreaks', v)} />} />

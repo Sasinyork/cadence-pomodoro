@@ -3,6 +3,9 @@ import type { SurfaceTokens, ThemeSource } from '../../types';
 import { alpha } from '../../lib/tokens';
 import { Icons } from '../icons';
 
+const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+const shortcutBadge = isMac ? '⌘K' : 'Ctrl+K';
+
 type Screen = 'timer' | 'tasks' | 'analytics' | 'settings';
 
 interface SidebarProps {
@@ -16,9 +19,10 @@ interface SidebarProps {
   onNavigate: (screen: Screen) => void;
   onSetThemeSource: (source: ThemeSource) => void;
   onSignOut: () => void;
+  onOpenShortcuts: () => void;
 }
 
-export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEmail, isGuest, onNavigate, onSetThemeSource, onSignOut }: SidebarProps) {
+export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEmail, isGuest, onNavigate, onSetThemeSource, onSignOut, onOpenShortcuts }: SidebarProps) {
   const [hoveredItem, setHoveredItem] = useState<Screen | null>(null);
   const [logoHovered, setLogoHovered] = useState(false);
   const [signOutHovered, setSignOutHovered] = useState(false);
@@ -164,11 +168,20 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', color: t.textFaint, fontSize: 12, marginTop: 4 }}>
+        <button
+          onClick={onOpenShortcuts}
+          className="theme-btn"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 12px', color: t.textFaint, fontSize: 12, marginTop: 4,
+            background: 'none', border: 'none', cursor: 'pointer',
+            width: '100%', textAlign: 'left', borderRadius: 8, fontFamily: 'inherit',
+          }}
+        >
           <Icons.help size={14} />
           <span>Keyboard shortcuts</span>
-          <span style={{ marginLeft: 'auto', fontFamily: '"JetBrains Mono", monospace', fontSize: 10, padding: '2px 5px', background: t.surfaceAlt, borderRadius: 4 }}>⌘K</span>
-        </div>
+          <span style={{ marginLeft: 'auto', fontFamily: '"JetBrains Mono", monospace', fontSize: 10, padding: '2px 5px', background: t.surfaceAlt, borderRadius: 4 }}>{shortcutBadge}</span>
+        </button>
 
         {/* User row */}
         <div style={{

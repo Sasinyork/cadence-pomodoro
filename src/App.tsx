@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import { useDbSync } from './hooks/useDbSync';
 import { SURFACE, getAccent } from './lib/tokens';
 import { Sidebar } from './components/layout/Sidebar';
+import { KeyboardShortcutsModal } from './components/layout/KeyboardShortcutsModal';
 import { DashboardScreen } from './screens/DashboardScreen';
 import { AnalyticsScreen } from './screens/AnalyticsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -24,7 +25,7 @@ function useIsMobile() {
 const GUEST_KEY = 'cadence-guest';
 
 export default function App() {
-  const { state, dispatch } = useApp();
+  const { state, dispatch, startTimer, pauseTimer, resetTimer, skipSession } = useApp();
   const { user, loading, signOut } = useAuth();
   const isMobile = useIsMobile();
   const t = SURFACE[state.theme];
@@ -32,8 +33,48 @@ export default function App() {
   const isDark = state.theme === 'dark';
 
   const [isGuest, setIsGuest] = useState(() => localStorage.getItem(GUEST_KEY) === 'true');
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   useDbSync(user?.id ?? null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const inInput = document.activeElement?.tagName === 'INPUT'
+        || document.activeElement?.tagName === 'TEXTAREA'
+        || (document.activeElement as HTMLElement)?.isContentEditable;
+      if (inInput) return;
+
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setShowShortcuts((v) => !v);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setShowShortcuts(false);
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
+        const screenMap: Record<string, 'timer' | 'tasks' | 'analytics' | 'settings'> = {
+          '1': 'timer', '2': 'tasks', '3': 'analytics', '4': 'settings',
+        };
+        if (screenMap[e.key]) {
+          e.preventDefault();
+          dispatch({ type: 'SET_SCREEN', screen: screenMap[e.key] });
+        }
+        return;
+      }
+      if (e.key === ' ') {
+        e.preventDefault();
+        if (state.timerState === 'running') pauseTimer(); else startTimer();
+        return;
+      }
+      if (e.key === 'r' || e.key === 'R') { resetTimer(); return; }
+      if (e.key === 's' || e.key === 'S') { skipSession(); return; }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state.timerState, dispatch, startTimer, pauseTimer, resetTimer, skipSession]);
 
   function handleGuest() {
     localStorage.setItem(GUEST_KEY, 'true');
@@ -94,6 +135,7 @@ export default function App() {
         onNavigate={(screen) => dispatch({ type: 'SET_SCREEN', screen })}
         onSetThemeSource={(source) => dispatch({ type: 'SET_THEME_SOURCE', source })}
         onSignOut={handleSignOut}
+        onOpenShortcuts={() => setShowShortcuts(true)}
       />
 
       <div id="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
@@ -107,6 +149,13 @@ export default function App() {
           <SettingsScreen theme={t} accent={accent} />
         )}
       </div>
+
+      {showShortcuts && (
+        <KeyboardShortcutsModal
+          theme={t} accent={accent}
+          onClose={() => setShowShortcuts(false)}
+        />
+      )}
     </div>
   );
 }

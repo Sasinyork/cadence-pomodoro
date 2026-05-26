@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: Settings = {
   pauseWhenInactive: true,
   browserNotifications: true,
   soundEffects: true,
-  ambientTrack: 'Brown noise',
+  dailyGoalMins: 120,
 };
 
 function getSystemTheme(): Theme {
@@ -24,12 +24,18 @@ function resolveTheme(source: ThemeSource): Theme {
   return source;
 }
 
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function getInitialState(): AppState {
   const saved = localStorage.getItem('cadence-state');
   if (saved) {
     try {
-      const parsed = JSON.parse(saved) as Partial<AppState>;
+      const parsed = JSON.parse(saved) as Partial<AppState> & { lastSessionDate?: string };
       const source: ThemeSource = parsed.themeSource ?? 'system';
+      // Restore todaySessions only if the last session was today, otherwise reset to 0.
+      const isToday = parsed.lastSessionDate === todayStr();
       return {
         themeSource: source,
         theme: resolveTheme(source),
@@ -43,8 +49,8 @@ function getInitialState(): AppState {
         tasks: [],
         deletedTasks: parsed.deletedTasks ?? [],
         settings: { ...DEFAULT_SETTINGS, ...(parsed.settings ?? {}) },
-        streak: 0,
-        todaySessions: 0,
+        streak: parsed.streak ?? 0,
+        todaySessions: isToday ? (parsed.todaySessions ?? 0) : 0,
         currentScreen: 'timer',
       };
     } catch {
@@ -79,6 +85,7 @@ type Action =
   | { type: 'SET_TIMER_STATE'; state: TimerState }
   | { type: 'TICK' }
   | { type: 'TIMER_COMPLETE' }
+  | { type: 'SKIP_SESSION' }
   | { type: 'RESET_TIMER' }
   | { type: 'SET_SCREEN'; screen: AppState['currentScreen'] }
   | { type: 'SET_ACTIVE_TASK'; id: string | null }
@@ -125,6 +132,8 @@ function reducer(state: AppState, action: Action): AppState {
     case 'TIMER_COMPLETE': {
       const newSessionCount = state.mode === 'focus' ? state.sessionCount + 1 : state.sessionCount;
       const newTodaySessions = state.mode === 'focus' ? state.todaySessions + 1 : state.todaySessions;
+      // Increment streak on the first focus session of the day (todaySessions was 0 before this completion).
+      const newStreak = state.mode === 'focus' && state.todaySessions === 0 ? state.streak + 1 : state.streak;
       // increment pomodoro done on active task
       const tasks = state.mode === 'focus' && state.activeTaskId
         ? state.tasks.map((t) => {
@@ -145,7 +154,19 @@ function reducer(state: AppState, action: Action): AppState {
         secondsLeft: secsForMode(nm, state.settings),
         sessionCount: newSessionCount,
         todaySessions: newTodaySessions,
+        streak: newStreak,
         tasks,
+      };
+    }
+    case 'SKIP_SESSION': {
+      const newSessionCount = state.mode === 'focus' ? state.sessionCount + 1 : state.sessionCount;
+      const nm = nextMode(state.mode, state.sessionCount, state.settings.longBreakAfter);
+      return {
+        ...state,
+        mode: nm,
+        timerState: 'idle',
+        secondsLeft: secsForMode(nm, state.settings),
+        sessionCount: newSessionCount,
       };
     }
     case 'RESET_TIMER':
@@ -309,6 +330,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         settings: state.settings,
         streak: state.streak,
         todaySessions: state.todaySessions,
+        lastSessionDate: state.todaySessions > 0 ? todayStr() : undefined,
         sessionCount: state.sessionCount,
         activeTaskId: state.activeTaskId,
       };
@@ -320,7 +342,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const pauseTimer = useCallback(() => dispatch({ type: 'SET_TIMER_STATE', state: 'paused' }), []);
   const resetTimer = useCallback(() => dispatch({ type: 'RESET_TIMER' }), []);
   const skipSession = useCallback(() => {
-    dispatch({ type: 'TIMER_COMPLETE' });
+    dispatch({ type: 'SKIP_SESSION' });
   }, []);
 
   return (

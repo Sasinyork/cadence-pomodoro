@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { SurfaceTokens, Task } from '../types';
 import { alpha, MODES } from '../lib/tokens';
-import { Btn, PomodoroDots, PriorityDot, TagPill } from '../components/ui';
+import { Btn, Toggle, PomodoroDots, PriorityDot, TagPill } from '../components/ui';
 import { Icons } from '../components/icons';
 import { BarTimer } from '../components/timer/BarTimer';
 import { CircleTimer } from '../components/timer/CircleTimer';
@@ -12,6 +12,8 @@ import { WeeklyChart } from '../components/analytics/WeeklyChart';
 import { HeatmapCard } from '../components/analytics/HeatmapCard';
 import { formatTime } from '../lib/data';
 import { useApp } from '../context/AppContext';
+import { useAnalytics } from '../hooks/useAnalytics';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 type Screen = 'timer' | 'tasks' | 'analytics' | 'settings';
 
@@ -19,6 +21,7 @@ export function MobileScreen({ theme: t, accent }: { theme: SurfaceTokens; accen
   const { state, dispatch, startTimer, pauseTimer, resetTimer, skipSession } = useApp();
   const [tab, setTab] = useState<Screen>('timer');
   const [showModal, setShowModal] = useState(false);
+  useEscapeKey(useCallback(() => setShowModal(false), []), showModal);
 
   const activeTask = state.tasks.find((task) => task.id === state.activeTaskId) ?? null;
   const totalSecs = state.mode === 'focus' ? state.settings.pomodoroMins * 60
@@ -62,9 +65,13 @@ export function MobileScreen({ theme: t, accent }: { theme: SurfaceTokens; accen
               <div style={{ width: 36, height: 4, borderRadius: 2, background: t.border }} />
             </div>
             <TaskFormModal theme={t} accent={accent} onClose={() => setShowModal(false)}
-              onSubmit={(data) => {
+              onSubmit={(data, startNow) => {
                 const id = crypto.randomUUID();
                 dispatch({ type: 'ADD_TASK', task: { ...data, id, createdAt: Date.now(), active: false, done: 0, completed: false } });
+                if (startNow) {
+                  dispatch({ type: 'SET_ACTIVE_TASK', id });
+                  startTimer();
+                }
               }} />
           </div>
         </div>
@@ -208,32 +215,52 @@ function MobileTasksTab({ t, accent, setShowModal }: { t: SurfaceTokens; accent:
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {filtered.map((task) => (
-          <div key={task.id} style={{
-            background: t.surface, border: `1px solid ${t.borderSoft}`,
-            borderRadius: 12, padding: '14px 16px',
-            display: 'flex', alignItems: 'flex-start', gap: 12,
-            opacity: task.completed ? 0.6 : 1,
-          }}>
-            <button onClick={() => dispatch({ type: 'TOGGLE_TASK_COMPLETE', id: task.id })} style={{
-              width: 18, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 1,
-              border: `1.5px solid ${task.completed ? accent : t.border}`,
-              background: task.completed ? accent : 'transparent',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', padding: 0,
-            }}>
-              {task.completed && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5L4 7L8 3" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-            </button>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: t.text, letterSpacing: -0.1, textDecoration: task.completed ? 'line-through' : 'none' }}>{task.title}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                <PomodoroDots done={task.done} total={task.total} accent={accent} theme={t} size={8} />
-                <span style={{ fontSize: 11, color: t.textMuted, fontFamily: '"JetBrains Mono", monospace' }}>{task.done}/{task.total}</span>
-                {task.tags.slice(0, 2).map((tag) => <TagPill key={tag} theme={t} label={tag} />)}
+        {filtered.map((task) => {
+          const isActive = task.id === state.activeTaskId;
+          return (
+            <div
+              key={task.id}
+              onClick={() => { if (!task.completed) dispatch({ type: 'SET_ACTIVE_TASK', id: isActive ? null : task.id }); }}
+              style={{
+                background: isActive ? alpha(accent, 0.05) : t.surface,
+                border: `1px solid ${isActive ? alpha(accent, 0.3) : t.borderSoft}`,
+                borderRadius: 12, padding: '14px 16px',
+                display: 'flex', alignItems: 'flex-start', gap: 12,
+                opacity: task.completed ? 0.6 : 1,
+                cursor: task.completed ? 'default' : 'pointer',
+              }}
+            >
+              <button
+                onClick={(e) => { e.stopPropagation(); dispatch({ type: 'TOGGLE_TASK_COMPLETE', id: task.id }); }}
+                style={{
+                  width: 18, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 1,
+                  border: `1.5px solid ${task.completed ? accent : t.border}`,
+                  background: task.completed ? accent : 'transparent',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', padding: 0,
+                }}
+              >
+                {task.completed && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5L4 7L8 3" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </button>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: t.text, letterSpacing: -0.1, textDecoration: task.completed ? 'line-through' : 'none' }}>{task.title}</div>
+                  {isActive && (
+                    <span className="sig-status-label" style={{ color: accent, flexShrink: 0 }}>
+                      <span className="sig-live-dot" style={{ background: accent }} />
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <PomodoroDots done={task.done} total={task.total} accent={accent} theme={t} size={8} />
+                  <span style={{ fontSize: 11, color: t.textMuted, fontFamily: '"JetBrains Mono", monospace' }}>{task.done}/{task.total}</span>
+                  {task.tags.slice(0, 2).map((tag) => <TagPill key={tag} theme={t} label={tag} />)}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -241,12 +268,40 @@ function MobileTasksTab({ t, accent, setShowModal }: { t: SurfaceTokens; accent:
 
 function MobileAnalyticsTab({ t, accent }: { t: SurfaceTokens; accent: string }) {
   const { state } = useApp();
+  const analytics = useAnalytics(state.tasks, state.todaySessions);
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5, marginBottom: 4 }}>Stats</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5, marginBottom: 4 }}>Analytics</div>
       <StreakCard theme={t} days={state.streak} />
-      <WeeklyChart theme={t} accent={accent} />
-      <HeatmapCard theme={t} accent={accent} />
+      <WeeklyChart theme={t} accent={accent} data={analytics.weekFocus} totalSecs={analytics.weekTotalSecs} />
+      <HeatmapCard theme={t} accent={accent} data={analytics.heatmap} totalSessions={analytics.heatmapTotal} totalFocusSecs={analytics.totalFocusSecs} />
+    </div>
+  );
+}
+
+function MobileSettingsStepper({ t, label, hint, value, min, max, step = 1, unit, onChange }: {
+  t: SurfaceTokens; label: string; hint?: string; value: number; min: number; max: number; step?: number; unit?: string; onChange: (v: number) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: t.text }}>{label}</div>
+        {hint && <div style={{ fontSize: 12, color: t.textMuted, marginTop: 1 }}>{hint}</div>}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <button onClick={() => onChange(Math.max(min, value - step))} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.minus size={14} /></button>
+        <span style={{ fontSize: 14, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace', color: t.text, minWidth: 38, textAlign: 'center' }}>{value}{unit ? ` ${unit}` : ''}</span>
+        <button onClick={() => onChange(Math.min(max, value + step))} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.plus size={14} /></button>
+      </div>
+    </div>
+  );
+}
+
+function MobileSettingsSection({ t, title, children }: { t: SurfaceTokens; title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: t.surface, border: `1px solid ${t.borderSoft}`, borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: 0.8, textTransform: 'uppercase' }}>{title}</div>
+      {children}
     </div>
   );
 }
@@ -255,25 +310,61 @@ function MobileSettingsTab({ t, accent }: { t: SurfaceTokens; accent: string }) 
   const { state, dispatch } = useApp();
   const s = state.settings;
 
+  function update(key: keyof typeof s, val: unknown) {
+    dispatch({ type: 'UPDATE_SETTINGS', settings: { [key]: val } });
+  }
+
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5 }}>Settings</div>
-      {[
-        { label: 'Pomodoro', key: 'pomodoroMins' as const, value: s.pomodoroMins, unit: 'min' },
-        { label: 'Short break', key: 'shortBreakMins' as const, value: s.shortBreakMins, unit: 'min' },
-        { label: 'Long break', key: 'longBreakMins' as const, value: s.longBreakMins, unit: 'min' },
-      ].map((item) => (
-        <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${t.borderSoft}`, paddingBottom: 12 }}>
-          <span style={{ fontSize: 14, fontWeight: 500, color: t.text }}>{item.label}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={() => dispatch({ type: 'UPDATE_SETTINGS', settings: { [item.key]: Math.max(1, item.value - 1) } })} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.minus size={14} /></button>
-            <span style={{ fontSize: 15, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace', color: t.text, minWidth: 30, textAlign: 'center' }}>{item.value}</span>
-            <button onClick={() => dispatch({ type: 'UPDATE_SETTINGS', settings: { [item.key]: Math.min(99, item.value + 1) } })} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.plus size={14} /></button>
-          </div>
+
+      <MobileSettingsSection t={t} title="Timer durations">
+        <MobileSettingsStepper t={t} label="Pomodoro" hint="Deep work block" value={s.pomodoroMins} min={1} max={60} unit="min" onChange={(v) => update('pomodoroMins', v)} />
+        <MobileSettingsStepper t={t} label="Short break" value={s.shortBreakMins} min={1} max={30} unit="min" onChange={(v) => update('shortBreakMins', v)} />
+        <MobileSettingsStepper t={t} label="Long break" value={s.longBreakMins} min={5} max={60} unit="min" onChange={(v) => update('longBreakMins', v)} />
+        <MobileSettingsStepper t={t} label="Long break after" hint="Pomodoros before long break" value={s.longBreakAfter} min={2} max={8} unit="cycles" onChange={(v) => update('longBreakAfter', v)} />
+      </MobileSettingsSection>
+
+      <MobileSettingsSection t={t} title="Goals">
+        <MobileSettingsStepper
+          t={t} label="Daily focus goal" value={s.dailyGoalMins} min={25} max={480} step={25}
+          hint={s.dailyGoalMins >= 60 ? `${Math.floor(s.dailyGoalMins / 60)}h${s.dailyGoalMins % 60 > 0 ? ` ${s.dailyGoalMins % 60}m` : ''}` : `${s.dailyGoalMins}m`}
+          unit="min" onChange={(v) => update('dailyGoalMins', v)}
+        />
+      </MobileSettingsSection>
+
+      <MobileSettingsSection t={t} title="Automation">
+        <Toggle theme={t} on={s.autoStartBreaks} accent={accent} label="Auto-start breaks" hint="Begin a break as soon as a pomodoro ends" onChange={(v) => update('autoStartBreaks', v)} />
+        <Toggle theme={t} on={s.autoStartPomodoros} accent={accent} label="Auto-start pomodoros" hint="Jump into the next focus block after a break" onChange={(v) => update('autoStartPomodoros', v)} />
+        <Toggle theme={t} on={s.pauseWhenInactive} accent={accent} label="Pause when inactive" onChange={(v) => update('pauseWhenInactive', v)} />
+      </MobileSettingsSection>
+
+      <MobileSettingsSection t={t} title="Sound & Notifications">
+        <Toggle theme={t} on={s.browserNotifications} accent={accent} label="Browser notifications" onChange={(v) => update('browserNotifications', v)} />
+        <Toggle theme={t} on={s.soundEffects} accent={accent} label="Sound effects" hint="Play a soft chime at start and end" onChange={(v) => update('soundEffects', v)} />
+      </MobileSettingsSection>
+
+      <MobileSettingsSection t={t} title="Timer style">
+        <div style={{ display: 'flex', gap: 8 }}>
+          {(['bars', 'circle'] as const).map((style) => (
+            <button key={style} onClick={() => dispatch({ type: 'SET_TIMER_STYLE', style })} style={{
+              flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
+              border: `1px solid ${state.timerStyle === style ? accent : t.border}`,
+              background: state.timerStyle === style ? `${accent}18` : 'transparent',
+              color: state.timerStyle === style ? accent : t.textMuted,
+              cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize',
+            }}>{style}</button>
+          ))}
         </div>
-      ))}
-      <div style={{ paddingTop: 4 }}>
+      </MobileSettingsSection>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Btn theme={t} accent={accent} variant="secondary" full onClick={() => dispatch({ type: 'RESET_SETTINGS' })}>Reset to defaults</Btn>
+        <Btn theme={t} accent={accent} variant="danger" full onClick={() => {
+          if (confirm('Delete all tasks? This cannot be undone.')) {
+            state.tasks.forEach((task) => dispatch({ type: 'DELETE_TASK', id: task.id }));
+          }
+        }}>Clear all tasks</Btn>
       </div>
     </div>
   );

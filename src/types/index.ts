@@ -34,7 +34,7 @@ export interface Settings {
   pauseWhenInactive: boolean;
   browserNotifications: boolean;
   soundEffects: boolean;
-  ambientTrack: string;
+  dailyGoalMins: number;
 }
 
 export interface AppState {

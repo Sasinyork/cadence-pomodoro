@@ -8,7 +8,7 @@ interface TaskFormModalProps {
   theme: SurfaceTokens;
   accent: string;
   onClose: () => void;
-  onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) => void;
+  onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>, startNow: boolean) => void;
   initialTask?: Task;
   startNow?: boolean;
 }
@@ -34,7 +34,7 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, initialTask
       priority,
       total,
       tags: tags.split(',').map((s) => s.trim()).filter(Boolean),
-    });
+    }, doStart);
     onClose();
   }
 
@@ -45,7 +45,7 @@ export function TaskFormModal({ theme: t, accent, onClose, onSubmit, initialTask
       aria-labelledby="task-modal-title"
       className="modal-enter"
       style={{
-        width: 520, background: t.surface, border: `1px solid ${t.borderSoft}`,
+        width: '100%', maxWidth: 520, background: t.surface, border: `1px solid ${t.borderSoft}`,
         borderRadius: 16, boxShadow: t.shadowLift, overflow: 'hidden',
       }}
     >

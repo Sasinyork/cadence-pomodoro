@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { SurfaceTokens, Task } from '../types';
 import { alpha } from '../lib/tokens';
 import { Btn } from '../components/ui';
@@ -13,6 +13,7 @@ import { HeatmapCard } from '../components/analytics/HeatmapCard';
 import { PriorityDot } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; accent: string }) {
   const { state, dispatch, startTimer, pauseTimer, resetTimer, skipSession } = useApp();
@@ -23,6 +24,11 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
   const [filter, setFilter] = useState<'all' | 'high'>('all');
 
   const activeTask = state.tasks.find((t) => t.id === state.activeTaskId) ?? null;
+
+  useEscapeKey(useCallback(() => {
+    if (editingTask) { setEditingTask(null); return; }
+    if (showModal) setShowModal(false);
+  }, [editingTask, showModal]));
 
   const totalSecs = (() => {
     if (state.mode === 'focus') return state.settings.pomodoroMins * 60;
@@ -36,12 +42,16 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
   });
   const completedTasks = state.tasks.filter((t) => t.completed);
 
-  function handleAddTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) {
+  function handleAddTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>, startNow: boolean) {
     const id = crypto.randomUUID();
     dispatch({ type: 'ADD_TASK', task: { ...data, id, createdAt: Date.now(), active: false, done: 0, completed: false } });
+    if (startNow) {
+      dispatch({ type: 'SET_ACTIVE_TASK', id });
+      startTimer();
+    }
   }
 
-  function handleEditTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) {
+  function handleEditTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>, _startNow: boolean) {
     if (!editingTask) return;
     dispatch({ type: 'UPDATE_TASK', task: { ...editingTask, ...data, done: Math.min(editingTask.done, data.total) } });
     setEditingTask(null);
@@ -124,7 +134,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
                     <TaskCard
                       task={task} theme={t} accent={accent}
                       onToggleComplete={(id) => dispatch({ type: 'TOGGLE_TASK_COMPLETE', id })}
-                      onSetActive={(id) => dispatch({ type: 'SET_ACTIVE_TASK', id })}
+                      onSetActive={(id) => dispatch({ type: 'SET_ACTIVE_TASK', id: state.activeTaskId === id ? null : id })}
                       onDelete={(id) => dispatch({ type: 'DELETE_TASK', id })}
                       onEdit={(id) => setEditingTask(state.tasks.find((t) => t.id === id) ?? null)}
                     />
@@ -171,7 +181,13 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
         display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto',
       }}>
         <StreakCard theme={t} days={state.streak} />
-        <TodayStats theme={t} accent={accent} sessions={state.todaySessions} />
+        <TodayStats
+          theme={t} accent={accent}
+          sessions={state.todaySessions}
+          focusedMins={state.todaySessions * state.settings.pomodoroMins}
+          avgDailySessions={Math.round(analytics.weekFocus.slice(0, 6).reduce((sum, d) => sum + d.sessions, 0) / 6)}
+          dailyGoalMins={state.settings.dailyGoalMins}
+        />
         <HeatmapCard
           theme={t} accent={accent}
           data={analytics.heatmap}

@@ -45,6 +45,7 @@ export function TimerCard({
       background: t.surface, border: `1px solid ${t.borderSoft}`,
       borderRadius: 16, padding: '32px 36px 28px',
       boxShadow: t.shadow, position: 'relative', overflow: 'hidden',
+      flexShrink: 0,
     }}>
       {/* top row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -62,7 +63,7 @@ export function TimerCard({
             {MODES[mode].label.toUpperCase()}
           </span>
           <span style={{ fontSize: 12, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
-            session {sessionCount}/{totalSessions}
+            session {((sessionCount - 1) % totalSessions) + 1}/{totalSessions}
           </span>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>

@@ -15,7 +15,7 @@ export function MobileTabBar({ theme: t, accent, active, onNavigate }: MobileTab
   const tabs: { id: Screen; label: string; icon: React.ReactNode }[] = [
     { id: 'timer',     label: 'Timer',    icon: <Icons.timer size={20} /> },
     { id: 'tasks',     label: 'Tasks',    icon: <Icons.check size={20} /> },
-    { id: 'analytics', label: 'Stats',    icon: <Icons.chart size={20} /> },
+    { id: 'analytics', label: 'Analytics', icon: <Icons.chart size={20} /> },
     { id: 'settings',  label: 'Settings', icon: <Icons.gear size={20} /> },
   ];
 

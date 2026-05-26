@@ -229,10 +229,11 @@ interface NumberStepperProps {
   width?: number;
   min?: number;
   max?: number;
+  step?: number;
   onChange?: (v: number) => void;
 }
 
-export function NumberStepper({ theme: t, value, unit, width = 110, min = 1, max = 99, onChange }: NumberStepperProps) {
+export function NumberStepper({ theme: t, value, unit, width = 110, min = 1, max = 99, step = 1, onChange }: NumberStepperProps) {
   return (
     <div style={{
       display: "inline-flex", alignItems: "stretch", height: 38,
@@ -248,7 +249,7 @@ export function NumberStepper({ theme: t, value, unit, width = 110, min = 1, max
       <div style={{ display: "flex", flexDirection: "column", borderLeft: `1px solid ${t.border}` }}>
         <button
           className="stepper-btn"
-          onClick={() => onChange?.(Math.min(max, value + 1))}
+          onClick={() => onChange?.(Math.min(max, value + step))}
           style={{
             width: 24, flex: 1, background: "transparent",
             border: "none", borderBottom: `1px solid ${t.border}`,
@@ -260,7 +261,7 @@ export function NumberStepper({ theme: t, value, unit, width = 110, min = 1, max
         </button>
         <button
           className="stepper-btn"
-          onClick={() => onChange?.(Math.max(min, value - 1))}
+          onClick={() => onChange?.(Math.max(min, value - step))}
           style={{
             width: 24, flex: 1, background: "transparent",
             border: "none", cursor: "pointer", color: t.textMuted,
