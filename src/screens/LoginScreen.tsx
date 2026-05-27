@@ -24,12 +24,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
   }
 
   return (
-    <div style={{
-      width: '100vw', height: '100vh',
-      background: '#FAFAFA',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-    }}>
+    <div className="w-screen h-screen flex items-center justify-center" style={{ background: '#FAFAFA' }}>
       <div style={{
         width: 400, padding: '40px 36px',
         background: '#fff', borderRadius: 16,
@@ -37,7 +32,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
         boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
       }}>
         {/* logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+        <div className="flex items-center gap-3 mb-8">
           <div style={{
             width: 40, height: 40, borderRadius: 11,
             background: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -52,7 +47,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
         </div>
 
         {sent ? (
-          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+          <div className="text-center" style={{ padding: '8px 0' }}>
             <div style={{
               width: 52, height: 52, borderRadius: 26, margin: '0 auto 16px',
               background: alpha('#10B981', 0.1),
@@ -75,14 +70,14 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: 24 }}>
+            <div className="mb-6">
               <div style={{ fontSize: 20, fontWeight: 600, color: '#171717', letterSpacing: -0.3 }}>Sign in</div>
               <div style={{ fontSize: 14, color: '#737373', marginTop: 4 }}>
                 We'll email you a magic link — no password required.
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 14 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#737373', marginBottom: 6, letterSpacing: 0.2 }}>
                   EMAIL
@@ -108,12 +103,12 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
               <button
                 type="submit"
                 disabled={loading}
+                className="flex items-center justify-center gap-2"
                 style={{
                   height: 42, borderRadius: 8, background: ACCENT,
                   color: '#fff', fontSize: 14, fontWeight: 600,
                   border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.7 : 1, fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
                 {loading ? 'Sending…' : <>Send magic link <Icons.chevR size={14} color="#fff" /></>}
@@ -124,7 +119,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
               Your data is tied to your email and syncs across all your devices.
             </div>
 
-            <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <div className="mt-4 text-center">
               <button
                 onClick={onGuest}
                 style={{

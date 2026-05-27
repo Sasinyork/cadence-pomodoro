@@ -12,9 +12,9 @@ interface ShortcutRowProps {
 
 function ShortcutRow({ keys, label, theme: t }: ShortcutRowProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0' }}>
+    <div className="flex items-center justify-between" style={{ padding: '7px 0' }}>
       <span style={{ fontSize: 13, color: t.textMuted }}>{label}</span>
-      <div style={{ display: 'flex', gap: 4 }}>
+      <div className="flex gap-1">
         {keys.map((k) => (
           <kbd
             key={k}
@@ -78,12 +78,10 @@ export function KeyboardShortcutsModal({ theme: t, accent, onClose }: KeyboardSh
 
   return (
     <div
+      className="fixed inset-0 flex items-center justify-center z-50"
       style={{
-        position: 'fixed', inset: 0,
         background: 'rgba(10, 10, 10, 0.55)',
         backdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 50,
         animation: 'fadeIn 0.2s ease both',
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -97,7 +95,7 @@ export function KeyboardShortcutsModal({ theme: t, accent, onClose }: KeyboardSh
         animation: 'fadeIn 0.18s ease both',
       }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div className="flex items-center justify-between mb-5">
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: t.text, letterSpacing: -0.3 }}>Keyboard shortcuts</div>
             <div style={{ fontSize: 12, color: t.textFaint, marginTop: 2 }}>
@@ -106,10 +104,10 @@ export function KeyboardShortcutsModal({ theme: t, accent, onClose }: KeyboardSh
           </div>
           <button
             onClick={onClose}
+            className="flex cursor-pointer"
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
+              background: 'none', border: 'none',
               color: t.textFaint, padding: 4, borderRadius: 6,
-              display: 'flex',
             }}
           >
             <Icons.x size={16} />
@@ -117,7 +115,7 @@ export function KeyboardShortcutsModal({ theme: t, accent, onClose }: KeyboardSh
         </div>
 
         {/* Sections */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="flex flex-col gap-5">
           {sections.map((section) => (
             <div key={section.title}>
               <div style={{
@@ -134,9 +132,9 @@ export function KeyboardShortcutsModal({ theme: t, accent, onClose }: KeyboardSh
         </div>
 
         {/* Footer hint */}
-        <div style={{
-          marginTop: 20, paddingTop: 16, borderTop: `1px solid ${t.borderSoft}`,
-          fontSize: 11, color: t.textFaint, textAlign: 'center',
+        <div className="text-center mt-5 pt-4" style={{
+          borderTop: `1px solid ${t.borderSoft}`,
+          fontSize: 11, color: t.textFaint,
         }}>
           Shortcuts are disabled when typing in an input
         </div>

@@ -16,54 +16,23 @@ function fmtDuration(secs: number): string {
   return `${m}m`;
 }
 
-export function WeeklyChart({
-  theme: t,
-  accent,
-  data,
-  totalSecs,
-}: WeeklyChartProps) {
+export function WeeklyChart({ theme: t, accent, data, totalSecs }: WeeklyChartProps) {
   const max = Math.max(...data.map((d) => d.mins), 1);
   const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
   return (
-    <div
-      style={{
-        background: t.surface,
-        border: `1px solid ${t.borderSoft}`,
-        borderRadius: 12,
-        padding: "20px 22px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 18,
-        }}
-      >
+    <div style={{
+      background: t.surface,
+      border: `1px solid ${t.borderSoft}`,
+      borderRadius: 12,
+      padding: "20px 22px",
+    }}>
+      <div className="flex items-center justify-between mb-[18px]">
         <div>
-          <div
-            style={{
-              fontSize: 11,
-              color: t.textMuted,
-              fontWeight: 600,
-              letterSpacing: 0.6,
-              textTransform: "uppercase",
-            }}
-          >
+          <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: "uppercase" }}>
             This week
           </div>
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: t.text,
-              marginTop: 4,
-              fontFamily: '"JetBrains Mono", monospace',
-              letterSpacing: -0.5,
-            }}
-          >
+          <div style={{ fontSize: 22, fontWeight: 700, color: t.text, marginTop: 4, fontFamily: '"JetBrains Mono", monospace', letterSpacing: -0.5 }}>
             {totalSecs > 0 ? fmtDuration(totalSecs) : "—"}
           </div>
           <div style={{ fontSize: 12, color: t.textFaint, marginTop: 2 }}>
@@ -71,49 +40,25 @@ export function WeeklyChart({
           </div>
         </div>
       </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-end",
-          gap: 12,
-          height: 140,
-        }}
-      >
+      <div className="flex items-end gap-3" style={{ height: 140 }}>
         {data.map((d, i) => {
           const h = Math.max(4, (d.mins / max) * 130);
           const isToday = i === todayIdx;
           return (
-            <div
-              key={d.day}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "flex-end",
-                }}
-              >
+            <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
+              <div className="flex-1 w-full flex items-end">
                 <div
+                  className="w-full relative"
                   style={{
-                    width: "100%",
                     height: h,
                     borderRadius: "6px 6px 0 0",
                     background: isToday ? accent : alpha(accent, 0.25),
-                    position: "relative",
                   }}
                 >
                   {isToday && d.mins > 0 && (
                     <div
+                      className="absolute whitespace-nowrap"
                       style={{
-                        position: "absolute",
                         top: -22,
                         left: "50%",
                         transform: "translateX(-50%)",
@@ -121,7 +66,6 @@ export function WeeklyChart({
                         fontFamily: '"JetBrains Mono", monospace',
                         fontWeight: 600,
                         color: accent,
-                        whiteSpace: "nowrap",
                       }}
                     >
                       {fmtDuration(d.mins * 60)}

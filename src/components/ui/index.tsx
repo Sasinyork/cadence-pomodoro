@@ -70,14 +70,13 @@ export function Btn({
       onMouseLeave={() => { setHovered(false); setPressed(false); }}
       onMouseDown={() => { if (!disabled) setPressed(true); }}
       onMouseUp={() => setPressed(false)}
+      className="inline-flex items-center gap-2 whitespace-nowrap"
       style={{
-        display: "inline-flex", alignItems: "center", gap: 8,
         padding: pads[size], borderRadius: 8,
         fontWeight: 600, fontSize: fs[size],
         fontFamily: "inherit",
         cursor: disabled ? "not-allowed" : "pointer",
         transition: "all .15s ease",
-        whiteSpace: "nowrap",
         width: full ? "100%" : "auto",
         justifyContent: full ? "center" : "flex-start",
         opacity: disabled ? 0.55 : 1,
@@ -112,16 +111,14 @@ export function IconBtn({ icon, theme: t, accent, onClick, label, style, active 
     <button
       onClick={onClick}
       aria-label={label}
-      className="icon-btn"
+      className="icon-btn inline-flex items-center justify-center shrink-0 cursor-pointer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         width: 36, height: 36, borderRadius: 8,
-        display: "inline-flex", alignItems: "center", justifyContent: "center",
         background: active ? alpha(accent, 0.1) : hovered ? alpha(accent, 0.07) : "transparent",
         color: active || hovered ? accent : t.textMuted,
         border: "1px solid transparent",
-        cursor: "pointer", flexShrink: 0,
         ...style,
       }}
     >
@@ -146,12 +143,11 @@ export function Input({ theme: t, accent, label, fullWidth = true, mono = false,
   const [focused, setFocused] = useState(false);
 
   return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 6, width: fullWidth ? "100%" : "auto" }}>
+    <label className="flex flex-col gap-1.5" style={{ width: fullWidth ? "100%" : "auto" }}>
       {label && (
         <span style={{ fontSize: 12, fontWeight: 500, color: t.textMuted, letterSpacing: 0.2 }}>{label}</span>
       )}
-      <div style={{
-        display: "flex", alignItems: "center",
+      <div className="flex items-center" style={{
         background: t.surface,
         border: `1px solid ${error ? "#EF4444" : focused ? accent : t.border}`,
         borderRadius: 8, padding: "0 12px",
@@ -166,9 +162,10 @@ export function Input({ theme: t, accent, label, fullWidth = true, mono = false,
           {...rest}
           onFocus={(e) => { setFocused(true); rest.onFocus?.(e); }}
           onBlur={(e)  => { setFocused(false); rest.onBlur?.(e); }}
+          className="flex-1 border-none outline-none bg-transparent"
           style={{
-            flex: 1, height: 38, border: "none", outline: "none",
-            background: "transparent", color: t.text,
+            height: 38,
+            color: t.text,
             fontFamily: mono ? '"JetBrains Mono", monospace' : "inherit",
             fontSize: 14, fontWeight: 500,
           }}
@@ -195,7 +192,7 @@ export function Textarea({ theme: t, label, value, placeholder, rows = 3, onChan
   const [focused, setFocused] = useState(false);
 
   return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <label className="flex flex-col gap-1.5">
       {label && <span style={{ fontSize: 12, fontWeight: 500, color: t.textMuted, letterSpacing: 0.2 }}>{label}</span>}
       <textarea
         value={value}
@@ -204,13 +201,14 @@ export function Textarea({ theme: t, label, value, placeholder, rows = 3, onChan
         onChange={(e) => onChange?.(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        className="resize-y outline-none"
         style={{
           background: t.surface,
           border: `1px solid ${focused ? t.text + "40" : t.border}`,
           borderRadius: 8, padding: "10px 12px",
-          resize: "vertical", color: t.text,
+          color: t.text,
           fontFamily: "inherit", fontSize: 14,
-          outline: "none", lineHeight: 1.5,
+          lineHeight: 1.5,
           boxShadow: focused ? `0 0 0 3px ${t.text === "#171717" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"}` : "none",
           transition: "border-color 0.18s ease, box-shadow 0.18s ease",
         }}
@@ -235,37 +233,35 @@ interface NumberStepperProps {
 
 export function NumberStepper({ theme: t, value, unit, width = 110, min = 1, max = 99, step = 1, onChange }: NumberStepperProps) {
   return (
-    <div style={{
-      display: "inline-flex", alignItems: "stretch", height: 38,
+    <div className="inline-flex items-stretch overflow-hidden" style={{
+      height: 38,
       background: t.surface, border: `1px solid ${t.border}`,
-      borderRadius: 8, overflow: "hidden", width,
+      borderRadius: 8, width,
     }}>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+      <div className="flex-1 flex items-center justify-center gap-1">
         <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 15, fontWeight: 600, color: t.text }}>
           {value}
         </span>
         {unit && <span style={{ fontSize: 11, color: t.textFaint, marginLeft: 2 }}>{unit}</span>}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", borderLeft: `1px solid ${t.border}` }}>
+      <div className="flex flex-col" style={{ borderLeft: `1px solid ${t.border}` }}>
         <button
-          className="stepper-btn"
+          className="stepper-btn flex-1 flex items-center justify-center cursor-pointer"
           onClick={() => onChange?.(Math.min(max, value + step))}
           style={{
-            width: 24, flex: 1, background: "transparent",
+            width: 24, background: "transparent",
             border: "none", borderBottom: `1px solid ${t.border}`,
-            cursor: "pointer", color: t.textMuted,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+            color: t.textMuted, padding: 0,
           }}
         >
           <Icons.chev size={10} style={{ transform: "rotate(180deg)" }} />
         </button>
         <button
-          className="stepper-btn"
+          className="stepper-btn flex-1 flex items-center justify-center cursor-pointer"
           onClick={() => onChange?.(Math.max(min, value - step))}
           style={{
-            width: 24, flex: 1, background: "transparent",
-            border: "none", cursor: "pointer", color: t.textMuted,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+            width: 24, background: "transparent",
+            border: "none", color: t.textMuted, padding: 0,
           }}
         >
           <Icons.chev size={10} />
@@ -291,7 +287,7 @@ export function Toggle({ theme: t, on, accent, label, hint, onChange }: TogglePr
 
   return (
     <div
-      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}
+      className="flex items-center justify-between gap-4"
       onClick={() => onChange?.(!on)}
     >
       {label && (
@@ -303,17 +299,17 @@ export function Toggle({ theme: t, on, accent, label, hint, onChange }: TogglePr
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        className="relative shrink-0 cursor-pointer"
         style={{
-          width: 40, height: 22, borderRadius: 11, position: "relative",
+          width: 40, height: 22, borderRadius: 11,
           background: on ? accent : t.border,
           transition: "background .2s ease, transform .15s ease, box-shadow .15s ease",
-          flexShrink: 0, cursor: "pointer",
           transform: hovered ? "scale(1.06)" : "scale(1)",
           boxShadow: hovered && on ? `0 0 0 3px ${alpha(accent, 0.2)}` : "none",
         }}
       >
-        <div style={{
-          position: "absolute", top: 2, left: on ? 20 : 2,
+        <div className="absolute" style={{
+          top: 2, left: on ? 20 : 2,
           width: 18, height: 18, borderRadius: 9,
           background: "#fff",
           transition: "left .22s cubic-bezier(0.34,1.56,0.64,1)",
@@ -343,10 +339,9 @@ export function TagPill({ theme: t, label }: { theme: SurfaceTokens; label: stri
 
 export function PriorityDot({ priority, size = 8 }: { priority: Priority; size?: number }) {
   return (
-    <span style={{
+    <span className="inline-block shrink-0" style={{
       width: size, height: size, borderRadius: size / 2,
       background: PRIORITY_COLORS[priority],
-      flexShrink: 0, display: "inline-block",
     }} />
   );
 }
@@ -363,7 +358,7 @@ interface PomodoroDotsProps {
 
 export function PomodoroDots({ done, total, accent, theme: t, size = 10 }: PomodoroDotsProps) {
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <div className="inline-flex items-center gap-1">
       {Array.from({ length: total }).map((_, i) => (
         <span
           key={i}
@@ -394,23 +389,20 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({ theme: t, accent, title, message, confirmLabel = "Confirm", onConfirm, onCancel }: ConfirmDialogProps) {
   return (
     <div
+      className="fixed inset-0 flex items-center justify-center z-[100]"
       style={{
-        position: "fixed", inset: 0,
         background: "rgba(10,10,10,0.55)",
         backdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 100,
         animation: "fadeIn 0.18s ease both",
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
       <div
-        className="modal-enter"
+        className="modal-enter overflow-hidden"
         style={{
           width: 380, background: t.surface,
           border: `1px solid ${t.borderSoft}`,
           borderRadius: 14, boxShadow: t.shadowLift,
-          overflow: "hidden",
         }}
       >
         <div style={{ padding: "22px 24px 18px" }}>
@@ -421,8 +413,7 @@ export function ConfirmDialog({ theme: t, accent, title, message, confirmLabel =
             {message}
           </div>
         </div>
-        <div style={{
-          display: "flex", justifyContent: "flex-end", gap: 8,
+        <div className="flex justify-end gap-2" style={{
           padding: "14px 24px",
           borderTop: `1px solid ${t.borderSoft}`,
           background: t.surfaceAlt,

@@ -22,7 +22,7 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
 
   return (
     <div
-      className="task-card"
+      className="task-card relative flex flex-col"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => !task.completed && onSetActive?.(task.id)}
@@ -30,7 +30,7 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
         background: isActive ? alpha(accent, 0.04) : t.surface,
         border: `1px solid ${isActive ? alpha(accent, 0.3) : hovered ? t.border : t.borderSoft}`,
         borderRadius: 12, padding: dense ? '14px 16px' : '16px 18px',
-        position: 'relative', display: 'flex', flexDirection: 'column', gap: 10,
+        gap: 10,
         boxShadow: isActive
           ? `0 1px 3px ${alpha(accent, 0.08)}`
           : hovered
@@ -45,16 +45,15 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
       <span className="sig-stripe" style={{ background: pColor }} />
 
       {/* top row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+      <div className="flex items-start gap-3">
         <button
-          className="check-btn"
+          className="check-btn shrink-0 inline-flex items-center justify-center"
           onClick={(e) => { e.stopPropagation(); onToggleComplete?.(task.id); }}
           aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
           style={{
-            width: 18, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 1,
+            width: 18, height: 18, borderRadius: 9, marginTop: 1,
             border: `1.5px solid ${task.completed ? accent : t.border}`,
             background: task.completed ? accent : 'transparent',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', padding: 0,
           }}
         >
@@ -64,8 +63,8 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
             </svg>
           )}
         </button>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <div
               style={{
                 fontSize: 14.5, fontWeight: 600, color: t.text,
@@ -77,7 +76,7 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
               {task.title}
             </div>
             {isActive && (
-              <div className="sig-status-label" style={{ color: accent, flexShrink: 0 }}>
+              <div className="sig-status-label shrink-0" style={{ color: accent }}>
                 <span className="sig-live-dot" style={{ background: accent }} />
                 ACTIVE
               </div>
@@ -87,7 +86,7 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
             <div style={{ fontSize: 12.5, color: t.textMuted, marginTop: 4, lineHeight: 1.5 }}>{task.desc}</div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 2, marginTop: -2, marginRight: -6 }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex gap-0.5 -mt-0.5 -mr-1.5" onClick={(e) => e.stopPropagation()}>
           <IconBtn
             theme={t} icon={<Icons.edit size={14} />} accent={accent}
             label={`Edit "${task.title}"`}
@@ -104,17 +103,16 @@ export function TaskCard({ task, theme: t, accent, dense = false, onToggleComple
       </div>
 
       {/* meta row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingLeft: 30 }}>
+      <div className="flex items-center gap-3 pl-[30px]">
         <PomodoroDots done={task.done} total={task.total} accent={accent} theme={t} size={9} />
         <span style={{ fontSize: 11.5, color: t.textMuted, fontFamily: '"JetBrains Mono", monospace', fontWeight: 500 }}>
           {task.done}/{task.total}
         </span>
-        <div style={{ flex: 1 }} />
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="flex-1" />
+        <div className="flex gap-1">
           {task.tags.slice(0, 3).map((tag) => <TagPill key={tag} theme={t} label={tag} />)}
         </div>
       </div>
-
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { alpha } from '../../lib/tokens';
 interface HeatmapCardProps {
   theme: SurfaceTokens;
   accent: string;
-  data: number[];       // 35 values, one per day (last 5 weeks)
+  data: number[];
   totalSessions: number;
   totalFocusSecs: number;
 }
@@ -28,11 +28,11 @@ export function HeatmapCard({ theme: t, accent, data, totalSessions, totalFocusS
   };
 
   return (
-    <div style={{
+    <div className="flex flex-col" style={{
       background: t.surface, border: `1px solid ${t.borderSoft}`,
-      borderRadius: 12, padding: 18, display: 'flex', flexDirection: 'column', gap: 14,
+      borderRadius: 12, padding: 18, gap: 14,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="flex items-center justify-between">
         <div>
           <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase' }}>Last 35 days</div>
           <div style={{ fontSize: 12, color: t.textFaint, marginTop: 3 }}>
@@ -45,15 +45,15 @@ export function HeatmapCard({ theme: t, accent, data, totalSessions, totalFocusS
           {new Date().toLocaleDateString('en-US', { month: 'short' })}
         </span>
       </div>
-      <div style={{ display: 'flex', gap: 6 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: 1 }}>
+      <div className="flex gap-1.5">
+        <div className="flex flex-col justify-between pt-[1px]">
           {['M', '', 'W', '', 'F', '', ''].map((d, i) => (
             <div key={i} style={{ fontSize: 9, color: t.textFaint, height: 14, fontFamily: '"JetBrains Mono", monospace' }}>{d}</div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+        <div className="flex gap-1 flex-1">
           {Array.from({ length: 5 }).map((_, w) => (
-            <div key={w} style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+            <div key={w} className="flex flex-col gap-1 flex-1">
               {Array.from({ length: 7 }).map((_, d) => {
                 const v = grid[w * 7 + d];
                 return (
@@ -68,7 +68,7 @@ export function HeatmapCard({ theme: t, accent, data, totalSessions, totalFocusS
           ))}
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
+      <div className="flex items-center gap-1.5 shrink-0" style={{ fontSize: 10, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
         <span>less</span>
         {[t.borderSoft, alpha(accent, 0.25), alpha(accent, 0.55), accent].map((c, i) => (
           <span key={i} style={{ width: 10, height: 10, borderRadius: 2, background: c, flexShrink: 0 }} />

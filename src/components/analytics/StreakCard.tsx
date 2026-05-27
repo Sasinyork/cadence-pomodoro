@@ -12,21 +12,20 @@ export function StreakCard({ theme: t, days }: StreakCardProps) {
   const pct = Math.min((days / nextMilestone) * 100, 100);
 
   return (
-    <div style={{
+    <div className="flex flex-col" style={{
       background: t.surface, border: `1px solid ${t.borderSoft}`,
-      borderRadius: 12, padding: 18,
-      display: 'flex', flexDirection: 'column', gap: 12,
+      borderRadius: 12, padding: 18, gap: 12,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="flex items-center justify-between">
         <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase' }}>Current streak</div>
         <Icons.fire size={16} color={flameColor} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+      <div className="flex items-baseline gap-2">
         <span style={{ fontSize: 38, fontWeight: 700, color: t.text, letterSpacing: -1.5, fontFamily: '"JetBrains Mono", monospace', lineHeight: 1 }}>{days}</span>
         <span style={{ fontSize: 14, color: t.textMuted, fontWeight: 500 }}>days</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.borderSoft, overflow: 'hidden' }}>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-1 rounded-sm overflow-hidden" style={{ background: t.borderSoft }}>
           <div style={{ width: `${pct}%`, height: '100%', background: flameColor, borderRadius: 2, transition: 'width .3s' }} />
         </div>
         <span style={{ fontSize: 11, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>{nextMilestone - days}d to {nextMilestone}</span>

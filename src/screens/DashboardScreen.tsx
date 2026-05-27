@@ -62,9 +62,9 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
   return (
     <>
       {/* Main column */}
-      <main className="screen-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <main className="screen-enter flex-1 flex flex-col min-w-0">
         {/* header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}`, flexShrink: 0 }}>
+        <div className="flex items-center justify-between shrink-0" style={{ padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}` }}>
           <div>
             <div style={{ fontSize: 22, fontWeight: 600, color: t.text, letterSpacing: -0.4 }}>
               {isTasksView ? 'Tasks' : `${new Date().toLocaleDateString('en-US', { weekday: 'long' })} focus`}
@@ -78,7 +78,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
           <Btn theme={t} accent={accent} variant="primary" icon={<Icons.plus size={14} />} onClick={() => setShowModal(true)}>New task</Btn>
         </div>
 
-        <div style={{ flex: 1, padding: 28, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 22 }}>
+        <div className="flex-1 overflow-y-auto flex flex-col" style={{ padding: 28, gap: 22 }}>
           {!isTasksView && (
             <TimerCard
               theme={t} accent={accent} mode={state.mode}
@@ -100,25 +100,24 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
 
           {/* Task list */}
           <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>Active tasks</h2>
+            <div className="flex items-center justify-between mb-[14px]">
+              <div className="flex items-baseline gap-3">
+                <h2 className="m-0" style={{ fontSize: 15, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>Active tasks</h2>
                 <span style={{ fontSize: 12, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
                   {filteredTasks.length} open · {completedTasks.length} completed
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div className="flex gap-1">
                 {(['all', 'high'] as const).map((f) => (
                   <button
                     key={f}
-                    className="filter-btn"
+                    className="filter-btn capitalize cursor-pointer"
                     onClick={() => setFilter(f)}
                     style={{
                       padding: '5px 11px', borderRadius: 7, fontSize: 12, fontWeight: 500,
                       background: filter === f ? alpha(accent, 0.1) : 'transparent',
                       color: filter === f ? accent : t.textMuted,
-                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                      textTransform: 'capitalize',
+                      border: 'none', fontFamily: 'inherit',
                     }}
                   >{f === 'all' ? 'All' : 'High priority'}</button>
                 ))}
@@ -126,7 +125,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
             </div>
 
             {filteredTasks.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 gap-3">
                 {filteredTasks.map((task, i) => (
                   <div
                     key={task.id}
@@ -145,9 +144,9 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
               </div>
             ) : (
               <div
-                className="card-enter"
+                className="card-enter text-center"
                 style={{
-                  padding: '60px 24px', textAlign: 'center', borderRadius: 12,
+                  padding: '60px 24px', borderRadius: 12,
                   border: `1.5px dashed ${t.border}`, background: 'transparent',
                 }}
               >
@@ -177,10 +176,10 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
       </main>
 
       {/* Right panel */}
-      <aside style={{
-        width: 320, flexShrink: 0, padding: '20px 22px',
+      <aside className="shrink-0 overflow-y-auto flex flex-col" style={{
+        width: 320, padding: '20px 22px',
         borderLeft: `1px solid ${t.borderSoft}`,
-        display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto',
+        gap: 14,
       }}>
         <StreakCard theme={t} days={state.streak} />
         <TodayStats
@@ -202,16 +201,16 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
             background: t.surface, border: `1px solid ${t.borderSoft}`,
             borderRadius: 12, padding: 18,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div className="flex items-center justify-between mb-3">
               <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase' }}>Up next</div>
               <span style={{ fontSize: 11, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>auto-queue</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="flex flex-col gap-[10px]">
               {upNext.map((task, i) => (
-                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div key={task.id} className="flex items-center gap-[10px]">
                   <span style={{ fontSize: 10, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace', width: 14, textAlign: 'right' }}>{i + 1}</span>
                   <PriorityDot priority={task.priority} size={6} />
-                  <span style={{ flex: 1, fontSize: 12.5, color: t.text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
+                  <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: 12.5, color: t.text, fontWeight: 500 }}>{task.title}</span>
                   <span style={{ fontSize: 11, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>{task.total - task.done}×</span>
                 </div>
               ))}
@@ -223,12 +222,10 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
       {/* Task form modal — create */}
       {showModal && (
         <div
+          className="fixed inset-0 flex items-center justify-center z-50"
           style={{
-            position: 'fixed', inset: 0,
             background: 'rgba(10, 10, 10, 0.55)',
             backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 50,
             animation: 'fadeIn 0.2s ease both',
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
@@ -244,12 +241,10 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
       {/* Task form modal — edit */}
       {editingTask && (
         <div
+          className="fixed inset-0 flex items-center justify-center z-50"
           style={{
-            position: 'fixed', inset: 0,
             background: 'rgba(10, 10, 10, 0.55)',
             backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 50,
             animation: 'fadeIn 0.2s ease both',
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setEditingTask(null); }}

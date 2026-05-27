@@ -30,16 +30,12 @@ export function MobileScreen({ theme: t, accent }: { theme: SurfaceTokens; accen
   const running = state.timerState === 'running';
 
   return (
-    <div style={{
-      width: '100%', height: '100%',
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{
       background: t.bg, color: t.text,
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       <MobileStatusBar theme={t} />
 
-      {/* content */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div className="flex-1 overflow-hidden flex flex-col">
         {tab === 'timer' && <MobileTimerTab t={t} accent={accent} activeTask={activeTask} totalSecs={totalSecs} running={running}
           onStart={startTimer} onPause={pauseTimer} onReset={resetTimer} onSkip={skipSession} />}
         {tab === 'tasks' && <MobileTasksTab t={t} accent={accent} setShowModal={setShowModal} />}
@@ -50,18 +46,17 @@ export function MobileScreen({ theme: t, accent }: { theme: SurfaceTokens; accen
       <MobileTabBar theme={t} accent={accent} active={tab} onNavigate={setTab} />
 
       {showModal && (
-        <div style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-          zIndex: 50,
-        }} onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
-          <div style={{
+        <div
+          className="fixed inset-0 flex items-end justify-center z-50"
+          style={{ background: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+        >
+          <div className="w-full overflow-y-auto" style={{
             background: t.surface, borderRadius: '20px 20px 0 0',
-            padding: '12px 20px 24px', width: '100%',
-            boxShadow: '0 -12px 32px rgba(0,0,0,0.25)', maxHeight: '90vh', overflowY: 'auto',
+            padding: '12px 20px 24px',
+            boxShadow: '0 -12px 32px rgba(0,0,0,0.25)', maxHeight: '90vh',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <div className="flex justify-center mb-3">
               <div style={{ width: 36, height: 4, borderRadius: 2, background: t.border }} />
             </div>
             <TaskFormModal theme={t} accent={accent} onClose={() => setShowModal(false)}
@@ -89,21 +84,21 @@ function MobileTimerTab({ t, accent, activeTask, totalSecs, running, onStart, on
   const [mins, secs] = formatTime(state.secondsLeft).split(':');
 
   return (
-    <div style={{ flex: 1, padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ padding: '8px 20px 16px' }}>
+      <div className="flex items-center justify-between mb-2">
         <div>
           <div style={{ fontSize: 11, color: t.textFaint, fontWeight: 500, letterSpacing: 0.4, textTransform: 'uppercase' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
           </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5, marginTop: 2 }}>Stay with it</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: alpha('#F97316', 0.12) }}>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: alpha('#F97316', 0.12) }}>
           <Icons.fire size={14} color="#F97316" />
           <span style={{ fontSize: 13, fontWeight: 600, color: '#F97316', fontFamily: '"JetBrains Mono", monospace' }}>{state.streak}</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0 12px' }}>
+      <div className="flex justify-center" style={{ margin: '20px 0 12px' }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '5px 12px', borderRadius: 999,
@@ -117,53 +112,50 @@ function MobileTimerTab({ t, accent, activeTask, totalSecs, running, onStart, on
 
       <div
         role="timer" aria-live="polite" aria-label={`${state.secondsLeft} seconds remaining`}
+        className="text-center mb-6"
         style={{
           fontFamily: '"JetBrains Mono", monospace',
           fontSize: 84, fontWeight: 600, color: t.text,
-          letterSpacing: -3, textAlign: 'center', lineHeight: 1,
-          fontVariantNumeric: 'tabular-nums', marginBottom: 24,
+          letterSpacing: -3, lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums',
         }}>
         {mins}<span style={{ color: t.textFaint, fontWeight: 400 }}>:</span>{secs}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+      <div className="flex justify-center mb-7">
         {state.timerStyle === 'bars'
           ? <BarTimer theme={t} accent={accent} totalMins={Math.ceil(totalSecs / 60)} elapsedSecs={elapsedSecs} running={running} size="md" />
           : <CircleTimer theme={t} accent={accent} totalSecs={totalSecs} elapsedSecs={elapsedSecs} size={180} strokeWidth={8} />
         }
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 24 }}>
-        <button onClick={onReset} style={{
+      <div className="flex items-center justify-center gap-[14px] mb-6">
+        <button onClick={onReset} className="inline-flex items-center justify-center cursor-pointer" style={{
           width: 52, height: 52, borderRadius: 26,
           background: t.surface, border: `1px solid ${t.border}`,
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          color: t.textMuted, cursor: 'pointer',
+          color: t.textMuted,
         }}><Icons.reset size={18} /></button>
-        <button onClick={running ? onPause : onStart} style={{
+        <button onClick={running ? onPause : onStart} className="inline-flex items-center justify-center cursor-pointer" style={{
           width: 68, height: 68, borderRadius: 34,
           background: accent, color: '#fff', border: 'none',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: `0 6px 20px ${alpha(accent, 0.4)}`,
-          cursor: 'pointer',
         }}>
           {running ? <Icons.pause size={22} color="#fff" /> : <Icons.play size={22} color="#fff" />}
         </button>
-        <button onClick={onSkip} style={{
+        <button onClick={onSkip} className="inline-flex items-center justify-center cursor-pointer" style={{
           width: 52, height: 52, borderRadius: 26,
           background: t.surface, border: `1px solid ${t.border}`,
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          color: t.textMuted, cursor: 'pointer',
+          color: t.textMuted,
         }}><Icons.skip size={18} /></button>
       </div>
 
       {activeTask && (
-        <div style={{ marginTop: 'auto', padding: '14px 16px', borderRadius: 12, background: t.surface, border: `1px solid ${t.borderSoft}` }}>
+        <div className="mt-auto" style={{ padding: '14px 16px', borderRadius: 12, background: t.surface, border: `1px solid ${t.borderSoft}` }}>
           <div style={{ fontSize: 10, color: t.textFaint, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 6 }}>Working on</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="flex items-center gap-[10px]">
             <PriorityDot priority={activeTask.priority} size={8} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: t.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeTask.title}</div>
+            <div className="flex-1 min-w-0">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: 14, fontWeight: 600, color: t.text }}>{activeTask.title}</div>
             </div>
             <PomodoroDots done={activeTask.done} total={activeTask.total} accent={accent} theme={t} size={8} />
           </div>
@@ -182,31 +174,29 @@ function MobileTasksTab({ t, accent, setShowModal }: { t: SurfaceTokens; accent:
     : activeTasks;
 
   return (
-    <div style={{ flex: 1, padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ padding: '8px 20px 16px' }}>
+      <div className="flex items-center justify-between mb-4">
         <div>
           <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5 }}>Tasks</div>
           <div style={{ fontSize: 12, color: t.textMuted, marginTop: 2 }}>{activeTasks.length} active · {state.tasks.filter((t) => t.completed).length} done</div>
         </div>
-        <button onClick={() => setShowModal(true)} style={{
+        <button onClick={() => setShowModal(true)} className="inline-flex items-center justify-center cursor-pointer" style={{
           width: 36, height: 36, borderRadius: 18, background: accent, border: 'none',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: `0 4px 12px ${alpha(accent, 0.35)}`, cursor: 'pointer',
+          boxShadow: `0 4px 12px ${alpha(accent, 0.35)}`,
         }}><Icons.plus size={18} color="#fff" /></button>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', flexShrink: 0 }}>
+      <div className="flex gap-1.5 mb-3.5 overflow-x-auto shrink-0">
         {[{ id: 'all', label: 'All', count: activeTasks.length },
           { id: 'high', label: 'High', count: activeTasks.filter((t) => t.priority === 'high').length },
           { id: 'done', label: 'Done', count: state.tasks.filter((t) => t.completed).length },
         ].map((f) => (
-          <button key={f.id} onClick={() => setFilter(f.id)} style={{
+          <button key={f.id} onClick={() => setFilter(f.id)} className="inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer" style={{
             padding: '6px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 500,
             background: filter === f.id ? alpha(accent, 0.12) : t.surface,
             border: `1px solid ${filter === f.id ? alpha(accent, 0.25) : t.borderSoft}`,
             color: filter === f.id ? accent : t.textMuted,
-            display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
-            cursor: 'pointer', fontFamily: 'inherit',
+            fontFamily: 'inherit',
           }}>
             {f.label}
             <span style={{ fontSize: 11, fontFamily: '"JetBrains Mono", monospace', opacity: 0.6 }}>{f.count}</span>
@@ -214,45 +204,45 @@ function MobileTasksTab({ t, accent, setShowModal }: { t: SurfaceTokens; accent:
         ))}
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="flex-1 overflow-y-auto flex flex-col gap-[10px]">
         {filtered.map((task) => {
           const isActive = task.id === state.activeTaskId;
           return (
             <div
               key={task.id}
               onClick={() => { if (!task.completed) dispatch({ type: 'SET_ACTIVE_TASK', id: isActive ? null : task.id }); }}
+              className="flex items-start gap-3"
               style={{
                 background: isActive ? alpha(accent, 0.05) : t.surface,
                 border: `1px solid ${isActive ? alpha(accent, 0.3) : t.borderSoft}`,
                 borderRadius: 12, padding: '14px 16px',
-                display: 'flex', alignItems: 'flex-start', gap: 12,
                 opacity: task.completed ? 0.6 : 1,
                 cursor: task.completed ? 'default' : 'pointer',
               }}
             >
               <button
                 onClick={(e) => { e.stopPropagation(); dispatch({ type: 'TOGGLE_TASK_COMPLETE', id: task.id }); }}
+                className="inline-flex items-center justify-center shrink-0 cursor-pointer"
                 style={{
-                  width: 18, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 1,
+                  width: 18, height: 18, borderRadius: 9, marginTop: 1,
                   border: `1.5px solid ${task.completed ? accent : t.border}`,
                   background: task.completed ? accent : 'transparent',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', padding: 0,
+                  padding: 0,
                 }}
               >
                 {task.completed && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5L4 7L8 3" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </button>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
                   <div style={{ fontSize: 14, fontWeight: 600, color: t.text, letterSpacing: -0.1, textDecoration: task.completed ? 'line-through' : 'none' }}>{task.title}</div>
                   {isActive && (
-                    <span className="sig-status-label" style={{ color: accent, flexShrink: 0 }}>
+                    <span className="sig-status-label shrink-0" style={{ color: accent }}>
                       <span className="sig-live-dot" style={{ background: accent }} />
                       ACTIVE
                     </span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <div className="flex items-center gap-2 mt-1.5">
                   <PomodoroDots done={task.done} total={task.total} accent={accent} theme={t} size={8} />
                   <span style={{ fontSize: 11, color: t.textMuted, fontFamily: '"JetBrains Mono", monospace' }}>{task.done}/{task.total}</span>
                   {task.tags.slice(0, 2).map((tag) => <TagPill key={tag} theme={t} label={tag} />)}
@@ -270,7 +260,7 @@ function MobileAnalyticsTab({ t, accent }: { t: SurfaceTokens; accent: string })
   const { state } = useApp();
   const analytics = useAnalytics(state.tasks, state.todaySessions);
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex-1 overflow-y-auto flex flex-col gap-3.5" style={{ padding: '8px 20px 16px' }}>
       <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5, marginBottom: 4 }}>Analytics</div>
       <StreakCard theme={t} days={state.streak} />
       <WeeklyChart theme={t} accent={accent} data={analytics.weekFocus} totalSecs={analytics.weekTotalSecs} />
@@ -283,15 +273,15 @@ function MobileSettingsStepper({ t, label, hint, value, min, max, step = 1, unit
   t: SurfaceTokens; label: string; hint?: string; value: number; min: number; max: number; step?: number; unit?: string; onChange: (v: number) => void;
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-      <div style={{ flex: 1 }}>
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex-1">
         <div style={{ fontSize: 14, fontWeight: 500, color: t.text }}>{label}</div>
         {hint && <div style={{ fontSize: 12, color: t.textMuted, marginTop: 1 }}>{hint}</div>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <button onClick={() => onChange(Math.max(min, value - step))} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.minus size={14} /></button>
-        <span style={{ fontSize: 14, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace', color: t.text, minWidth: 38, textAlign: 'center' }}>{value}{unit ? ` ${unit}` : ''}</span>
-        <button onClick={() => onChange(Math.min(max, value + step))} style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}><Icons.plus size={14} /></button>
+      <div className="flex items-center gap-2 shrink-0">
+        <button onClick={() => onChange(Math.max(min, value - step))} className="flex items-center justify-center cursor-pointer" style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, color: t.text }}><Icons.minus size={14} /></button>
+        <span className="text-center" style={{ fontSize: 14, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace', color: t.text, minWidth: 38 }}>{value}{unit ? ` ${unit}` : ''}</span>
+        <button onClick={() => onChange(Math.min(max, value + step))} className="flex items-center justify-center cursor-pointer" style={{ width: 32, height: 32, borderRadius: 8, background: t.surfaceAlt, border: `1px solid ${t.border}`, color: t.text }}><Icons.plus size={14} /></button>
       </div>
     </div>
   );
@@ -299,7 +289,7 @@ function MobileSettingsStepper({ t, label, hint, value, min, max, step = 1, unit
 
 function MobileSettingsSection({ t, title, children }: { t: SurfaceTokens; title: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: t.surface, border: `1px solid ${t.borderSoft}`, borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex flex-col" style={{ background: t.surface, border: `1px solid ${t.borderSoft}`, borderRadius: 12, padding: '14px 16px', gap: 14 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: 0.8, textTransform: 'uppercase' }}>{title}</div>
       {children}
     </div>
@@ -315,7 +305,7 @@ function MobileSettingsTab({ t, accent }: { t: SurfaceTokens; accent: string }) 
   }
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex-1 overflow-y-auto flex flex-col gap-3.5" style={{ padding: '8px 20px 24px' }}>
       <div style={{ fontSize: 22, fontWeight: 700, color: t.text, letterSpacing: -0.5 }}>Settings</div>
 
       <MobileSettingsSection t={t} title="Timer durations">
@@ -345,20 +335,20 @@ function MobileSettingsTab({ t, accent }: { t: SurfaceTokens; accent: string }) 
       </MobileSettingsSection>
 
       <MobileSettingsSection t={t} title="Timer style">
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2">
           {(['bars', 'circle'] as const).map((style) => (
-            <button key={style} onClick={() => dispatch({ type: 'SET_TIMER_STYLE', style })} style={{
-              flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
+            <button key={style} onClick={() => dispatch({ type: 'SET_TIMER_STYLE', style })} className="flex-1 capitalize cursor-pointer" style={{
+              padding: '8px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
               border: `1px solid ${state.timerStyle === style ? accent : t.border}`,
               background: state.timerStyle === style ? `${accent}18` : 'transparent',
               color: state.timerStyle === style ? accent : t.textMuted,
-              cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize',
+              fontFamily: 'inherit',
             }}>{style}</button>
           ))}
         </div>
       </MobileSettingsSection>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="flex flex-col gap-2">
         <Btn theme={t} accent={accent} variant="secondary" full onClick={() => dispatch({ type: 'RESET_SETTINGS' })}>Reset to defaults</Btn>
         <Btn theme={t} accent={accent} variant="danger" full onClick={() => {
           if (confirm('Delete all tasks? This cannot be undone.')) {

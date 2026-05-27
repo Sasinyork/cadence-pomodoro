@@ -36,19 +36,21 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
 
   return (
     <aside
-      className="sidebar-enter"
+      className="sidebar-enter flex flex-col shrink-0 h-full"
       style={{
-        width: 240, flexShrink: 0, height: '100%',
-        background: t.surface, borderRight: `1px solid ${t.borderSoft}`,
-        padding: '24px 16px', display: 'flex', flexDirection: 'column',
+        width: 240,
+        background: t.surface,
+        borderRight: `1px solid ${t.borderSoft}`,
+        padding: '24px 16px',
       }}
     >
       {/* Logo */}
       <div
+        className="flex items-center gap-[10px] cursor-default"
         style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '0 8px 24px', borderBottom: `1px solid ${t.borderSoft}`, marginBottom: 16,
-          cursor: 'default',
+          padding: '0 8px 24px',
+          borderBottom: `1px solid ${t.borderSoft}`,
+          marginBottom: 16,
         }}
         onMouseEnter={() => setLogoHovered(true)}
         onMouseLeave={() => setLogoHovered(false)}
@@ -76,20 +78,19 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
         </div>
       </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav className="flex flex-col gap-0.5">
         {items.map((it, index) => {
           const isActive = it.id === active;
           const isHovered = hoveredItem === it.id;
           return (
             <button
               key={it.id}
-              className="nav-item"
+              className="nav-item flex items-center gap-3 relative w-full text-left cursor-pointer"
               onClick={() => onNavigate(it.id)}
               onMouseEnter={() => setHoveredItem(it.id)}
               onMouseLeave={() => setHoveredItem(null)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '9px 12px', borderRadius: 8, position: 'relative',
+                padding: '9px 12px', borderRadius: 8,
                 background: isActive
                   ? alpha(accent, 0.1)
                   : isHovered
@@ -97,8 +98,7 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
                   : 'transparent',
                 color: isActive ? accent : isHovered ? t.text : t.textMuted,
                 fontWeight: isActive ? 600 : 500, fontSize: 13.5,
-                cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
-                fontFamily: 'inherit',
+                border: 'none', fontFamily: 'inherit',
                 boxShadow: isActive ? `inset 0 0 0 1px ${alpha(accent, 0.15)}` : 'none',
                 animationDelay: `${index * 0.04}s`,
                 animationFillMode: 'both',
@@ -106,17 +106,17 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
             >
               {isActive && (
                 <span
-                  className="nav-indicator"
+                  className="nav-indicator absolute"
                   style={{
-                    position: 'absolute', left: -16, top: '50%',
+                    left: -16, top: '50%',
                     width: 3, height: 18, borderRadius: 2, background: accent,
                   }}
                 />
               )}
-              <span className="nav-icon" style={{ display: 'flex', flexShrink: 0 }}>
+              <span className="nav-icon flex shrink-0">
                 {it.icon}
               </span>
-              <span style={{ flex: 1 }}>{it.label}</span>
+              <span className="flex-1">{it.label}</span>
               {isActive && (
                 <span className="sig-live-dot" style={{ background: accent, opacity: 0.6, boxShadow: `0 0 6px ${accent}` }} />
               )}
@@ -125,13 +125,13 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
         })}
       </nav>
 
-      <div style={{ flex: 1 }} />
+      <div className="flex-1" />
 
       {/* Secondary tray */}
-      <div style={{ borderTop: `1px solid ${t.borderSoft}`, paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ borderTop: `1px solid ${t.borderSoft}` }} className="pt-3 flex flex-col gap-1">
         {/* Theme source selector */}
         <div style={{ padding: '6px 12px 10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <div className="flex items-center gap-2 mb-2">
             {themeSource === 'system'
               ? (isDark ? <Icons.moon size={14} color={t.textMuted} /> : <Icons.sun size={14} color={t.textMuted} />)
               : themeSource === 'dark'
@@ -139,9 +139,9 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
               : <Icons.sun size={14} color={t.textMuted} />}
             <span style={{ fontSize: 12, fontWeight: 500, color: t.textMuted }}>Theme</span>
           </div>
-          <div style={{
-            display: 'flex', background: t.surfaceAlt,
-            border: `1px solid ${t.border}`, borderRadius: 8, padding: 2, gap: 2,
+          <div className="flex gap-0.5 p-0.5 rounded-lg" style={{
+            background: t.surfaceAlt,
+            border: `1px solid ${t.border}`,
           }}>
             {([
               { value: 'system', label: 'System' },
@@ -152,14 +152,14 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
               return (
                 <button
                   key={opt.value}
-                  className="theme-btn"
+                  className="theme-btn flex-1 rounded-md cursor-pointer"
                   onClick={() => onSetThemeSource(opt.value)}
                   style={{
-                    flex: 1, padding: '5px 4px', borderRadius: 6, fontSize: 11.5, fontWeight: isActiveTheme ? 600 : 500,
+                    padding: '5px 4px', fontSize: 11.5, fontWeight: isActiveTheme ? 600 : 500,
                     background: isActiveTheme ? t.surface : 'transparent',
                     color: isActiveTheme ? t.text : t.textFaint,
                     border: isActiveTheme ? `1px solid ${t.border}` : '1px solid transparent',
-                    cursor: 'pointer', fontFamily: 'inherit',
+                    fontFamily: 'inherit',
                     boxShadow: isActiveTheme ? t.shadow : 'none',
                   }}
                 >{opt.label}</button>
@@ -170,24 +170,28 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
 
         <button
           onClick={onOpenShortcuts}
-          className="theme-btn"
+          className="theme-btn flex items-center gap-[10px] w-full text-left rounded-lg mt-1 cursor-pointer"
           style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 12px', color: t.textFaint, fontSize: 12, marginTop: 4,
-            background: 'none', border: 'none', cursor: 'pointer',
-            width: '100%', textAlign: 'left', borderRadius: 8, fontFamily: 'inherit',
+            padding: '10px 12px', color: t.textFaint, fontSize: 12,
+            background: 'none', border: 'none', fontFamily: 'inherit',
           }}
         >
           <Icons.help size={14} />
           <span>Keyboard shortcuts</span>
-          <span style={{ marginLeft: 'auto', fontFamily: '"JetBrains Mono", monospace', fontSize: 10, padding: '2px 5px', background: t.surfaceAlt, borderRadius: 4 }}>{shortcutBadge}</span>
+          <span style={{
+            marginLeft: 'auto', fontFamily: '"JetBrains Mono", monospace', fontSize: 10,
+            padding: '2px 5px', background: t.surfaceAlt, borderRadius: 4,
+          }}>{shortcutBadge}</span>
         </button>
 
         {/* User row */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '10px 12px', borderTop: `1px solid ${t.borderSoft}`, marginTop: 4,
-        }}>
+        <div
+          className="flex items-center gap-2 mt-1"
+          style={{
+            padding: '10px 12px',
+            borderTop: `1px solid ${t.borderSoft}`,
+          }}
+        >
           <div style={{
             width: 26, height: 26, borderRadius: 13, flexShrink: 0,
             background: isGuest ? t.surfaceAlt : alpha(accent, 0.15),
@@ -199,21 +203,20 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
           }}>
             {isGuest ? '?' : userEmail.charAt(0).toUpperCase()}
           </div>
-          <span style={{ flex: 1, fontSize: 11.5, color: t.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: 11.5, color: t.textMuted }}>
             {isGuest ? 'Guest — data not saved' : userEmail}
           </span>
           <button
-            className="signout-btn"
+            className="signout-btn shrink-0 flex cursor-pointer"
             onClick={onSignOut}
             onMouseEnter={() => setSignOutHovered(true)}
             onMouseLeave={() => setSignOutHovered(false)}
             title={isGuest ? 'Sign in' : 'Sign out'}
             style={{
-              flexShrink: 0, background: signOutHovered ? alpha(accent, 0.08) : 'none',
-              border: 'none', cursor: 'pointer',
+              background: signOutHovered ? alpha(accent, 0.08) : 'none',
+              border: 'none',
               padding: 4, borderRadius: 5,
               color: signOutHovered ? accent : t.textFaint,
-              display: 'flex',
             }}
           >
             <Icons.logout size={14} />

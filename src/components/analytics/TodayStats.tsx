@@ -37,17 +37,17 @@ export function TodayStats({ theme: t, accent, sessions, focusedMins, avgDailySe
     : { text: `goal ${formatMins(dailyGoalMins)}`, color: t.textMuted };
 
   return (
-    <div style={{
+    <div className="flex flex-col" style={{
       background: t.surface, border: `1px solid ${t.borderSoft}`,
-      borderRadius: 12, padding: 18, display: 'flex', flexDirection: 'column', gap: 14,
+      borderRadius: 12, padding: 18, gap: 14,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="flex items-center justify-between">
         <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase' }}>Today</div>
         <span style={{ fontSize: 11, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
           {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <div style={{ fontSize: 10, color: t.textFaint, fontWeight: 500, letterSpacing: 0.3, textTransform: 'uppercase', marginBottom: 3 }}>Pomodoros</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: t.text, letterSpacing: -0.5, fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.1 }}>{sessions}</div>

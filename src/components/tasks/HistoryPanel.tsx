@@ -44,9 +44,7 @@ function HistoryRow({ task, type, theme: t, accent, onPrimary, onRemove }: RowPr
     : (task.completedAt ?? task.createdAt);
 
   return (
-    <div style={{
-      position: 'relative',
-      display: 'flex', alignItems: 'center', gap: 12,
+    <div className="relative flex items-center gap-3" style={{
       padding: '10px 14px 10px 18px',
       borderRadius: 8,
       background: t.surface,
@@ -54,15 +52,14 @@ function HistoryRow({ task, type, theme: t, accent, onPrimary, onRemove }: RowPr
     }}>
       <span className="sig-stripe" style={{ background: pColor, top: 8, bottom: 8 }} />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
+      <div className="flex-1 min-w-0">
+        <div className="overflow-hidden text-ellipsis whitespace-nowrap" style={{
           fontSize: 13.5, fontWeight: 500, color: type === 'deleted' ? t.textMuted : t.text,
           textDecoration: type === 'completed' ? 'line-through' : 'none',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {task.title}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+        <div className="flex items-center gap-1.5 mt-[3px]">
           <span style={{
             fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase',
             color: type === 'completed' ? '#10B981' : t.textFaint,
@@ -84,14 +81,14 @@ function HistoryRow({ task, type, theme: t, accent, onPrimary, onRemove }: RowPr
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+      <div className="flex gap-0.5 shrink-0">
         <button
           onClick={() => onPrimary(task.id)}
+          className="whitespace-nowrap cursor-pointer"
           style={{
             fontSize: 11, fontWeight: 500, padding: '4px 10px', borderRadius: 6,
             border: `1px solid ${t.border}`, background: 'transparent',
-            color: t.textMuted, cursor: 'pointer', fontFamily: 'inherit',
-            whiteSpace: 'nowrap',
+            color: t.textMuted, fontFamily: 'inherit',
           }}
         >
           {type === 'completed' ? 'Reopen' : 'Restore'}
@@ -123,26 +120,27 @@ export function HistoryPanel({ theme: t, accent, completedTasks, deletedTasks, o
 
   return (
     <section>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>History</h2>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-baseline gap-[10px]">
+          <h2 className="m-0" style={{ fontSize: 15, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>History</h2>
           <span style={{ fontSize: 12, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace' }}>
             {completedTasks.length} completed · {deletedTasks.length} deleted
           </span>
         </div>
         <button
           onClick={() => setConfirmOpen(true)}
+          className="cursor-pointer"
           style={{
             fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 6,
             border: `1px solid ${alpha('#EF4444', 0.25)}`, background: 'transparent',
-            color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit',
+            color: '#EF4444', fontFamily: 'inherit',
           }}
         >
           Clear all
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="flex flex-col gap-1.5">
         {allItems.map(({ task, type }) => (
           <HistoryRow
             key={`${type}-${task.id}`}

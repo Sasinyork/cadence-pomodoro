@@ -98,13 +98,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div style={{
-        width: '100vw', height: '100vh', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        background: t.bg, color: t.textMuted,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-        fontSize: 14,
-      }}>
+      <div className="w-screen h-screen flex items-center justify-center text-sm" style={{ background: t.bg, color: t.textMuted }}>
         Loading…
       </div>
     );
@@ -116,22 +110,22 @@ export default function App() {
 
   if (isMobile) {
     return (
-      <div style={{ width: '100vw', height: '100dvh', overflow: 'hidden' }}>
+      <div className="w-screen h-dvh overflow-hidden">
         <MobileScreen theme={t} accent={accent} />
       </div>
     );
   }
 
   return (
-    <div style={{
-      width: '100vw', height: '100vh', overflow: 'hidden',
-      background: t.bg, color: t.text,
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      display: 'flex',
-      fontFeatureSettings: '"cv11", "ss01"',
-      backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.09)'} 1px, transparent 1px)`,
-      backgroundSize: '22px 22px',
-    }}>
+    <div
+      className="w-screen h-screen overflow-hidden flex"
+      style={{
+        background: t.bg, color: t.text,
+        fontFeatureSettings: '"cv11", "ss01"',
+        backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.09)'} 1px, transparent 1px)`,
+        backgroundSize: '22px 22px',
+      }}
+    >
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
       <Sidebar
@@ -147,7 +141,7 @@ export default function App() {
         onOpenShortcuts={() => setShowShortcuts(true)}
       />
 
-      <div id="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div id="main-content" className="flex-1 flex overflow-hidden">
         {(state.currentScreen === 'timer' || state.currentScreen === 'tasks') && (
           <DashboardScreen theme={t} accent={accent} />
         )}

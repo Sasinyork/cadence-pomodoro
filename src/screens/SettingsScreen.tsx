@@ -11,16 +11,15 @@ interface SettingsScreenProps {
 function Section({ t, title, hint, children, delay = 0 }: { t: SurfaceTokens; title: string; hint?: string; children: ReactNode; delay?: number }) {
   return (
     <div
-      className="settings-section card-enter"
+      className="settings-section card-enter flex flex-col"
       style={{
         background: t.surface, border: `1px solid ${t.borderSoft}`,
-        borderRadius: 12, padding: '20px 24px',
-        display: 'flex', flexDirection: 'column', gap: 16,
+        borderRadius: 12, padding: '20px 24px', gap: 16,
         animationDelay: `${delay}s`, animationFillMode: 'both',
       }}
     >
       <div>
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>{title}</h3>
+        <h3 className="m-0" style={{ fontSize: 14, fontWeight: 600, color: t.text, letterSpacing: -0.2 }}>{title}</h3>
         {hint && <div style={{ fontSize: 12, color: t.textMuted, marginTop: 3 }}>{hint}</div>}
       </div>
       {children}
@@ -30,8 +29,8 @@ function Section({ t, title, hint, children, delay = 0 }: { t: SurfaceTokens; ti
 
 function Row({ t, label, hint, control }: { t: SurfaceTokens; label: string; hint?: string; control: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '4px 0' }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="flex items-center justify-between gap-4" style={{ padding: '4px 0' }}>
+      <div className="flex-1 min-w-0">
         <div style={{ fontSize: 13.5, fontWeight: 500, color: t.text }}>{label}</div>
         {hint && <div style={{ fontSize: 12, color: t.textMuted, marginTop: 2 }}>{hint}</div>}
       </div>
@@ -49,18 +48,18 @@ export function SettingsScreen({ theme: t, accent }: SettingsScreenProps) {
   }
 
   return (
-    <main className="screen-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <main className="screen-enter flex-1 flex flex-col min-w-0">
       {/* header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}`, flexShrink: 0 }}>
+      <div className="flex items-center justify-between shrink-0" style={{ padding: '20px 28px', borderBottom: `1px solid ${t.borderSoft}` }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: t.text, letterSpacing: -0.4 }}>Settings</h1>
+          <h1 className="m-0" style={{ fontSize: 22, fontWeight: 600, color: t.text, letterSpacing: -0.4 }}>Settings</h1>
           <div style={{ fontSize: 13, color: t.textMuted, marginTop: 2 }}>Tune timing, automation, and notifications</div>
         </div>
         <Btn theme={t} accent={accent} variant="secondary" onClick={() => dispatch({ type: 'RESET_SETTINGS' })}>Reset to defaults</Btn>
       </div>
 
-      <div style={{ flex: 1, padding: 28, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'minmax(0, 640px)', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, width: '100%' }}>
+      <div className="flex-1 overflow-y-auto grid justify-center" style={{ padding: 28, gridTemplateColumns: 'minmax(0, 640px)' }}>
+        <div className="flex flex-col w-full" style={{ gap: 18 }}>
           <Section t={t} title="Timer durations" hint="The intervals that shape one full cycle." delay={0.04}>
             <Row t={t} label="Pomodoro" hint="Deep work block"
               control={<NumberStepper theme={t} accent={accent} value={s.pomodoroMins} unit="min" min={1} max={60} onChange={(v) => update('pomodoroMins', v)} />} />
@@ -75,7 +74,7 @@ export function SettingsScreen({ theme: t, accent }: SettingsScreenProps) {
           <Section t={t} title="Goals" hint="Targets shown on your daily stats card." delay={0.06}>
             <Row t={t} label="Daily focus goal" hint="Total focus time to aim for each day"
               control={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className="flex items-center gap-[10px]">
                   <NumberStepper theme={t} accent={accent} value={s.dailyGoalMins} unit="min" min={25} max={480} step={25} width={130} onChange={(v) => update('dailyGoalMins', v)} />
                   <span style={{ fontSize: 12, color: t.textFaint, fontFamily: '"JetBrains Mono", monospace', minWidth: 32 }}>
                     {s.dailyGoalMins >= 60 ? `${Math.floor(s.dailyGoalMins / 60)}h${s.dailyGoalMins % 60 > 0 ? ` ${s.dailyGoalMins % 60}m` : ''}` : `${s.dailyGoalMins}m`}
@@ -104,19 +103,19 @@ export function SettingsScreen({ theme: t, accent }: SettingsScreenProps) {
           <Section t={t} title="Timer visualization" delay={0.16}>
             <Row t={t} label="Style" hint="Choose how the timer progress is displayed"
               control={
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div className="flex gap-1.5">
                   {(['bars', 'circle'] as const).map((style) => (
                     <button
                       key={style}
                       type="button"
-                      className="timer-style-btn"
+                      className="timer-style-btn capitalize cursor-pointer"
                       onClick={() => dispatch({ type: 'SET_TIMER_STYLE', style })}
                       style={{
                         padding: '6px 14px', borderRadius: 7, fontSize: 12, fontWeight: 500,
                         border: `1px solid ${state.timerStyle === style ? accent : t.border}`,
                         background: state.timerStyle === style ? `${accent}15` : 'transparent',
                         color: state.timerStyle === style ? accent : t.textMuted,
-                        cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize',
+                        fontFamily: 'inherit',
                       }}
                     >{style}</button>
                   ))}
