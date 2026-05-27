@@ -147,6 +147,9 @@ export function SettingsScreen({ theme: t, accent }: SettingsScreenProps) {
               }
             />
           </Section>
+          <div className="text-center" style={{ padding: '8px 0 4px', fontSize: 11, color: t.textFaint }}>
+            © {new Date().getFullYear()} Eman
+          </div>
         </div>
       </div>
     </main>
