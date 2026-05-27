@@ -21,6 +21,12 @@ function Icon({ d, size = 16, color = 'currentColor', strokeWidth = 1.75, fill =
 }
 
 export const Icons = {
+  logo: (p: IconProps) => <Icon {...p} d={<>
+    <circle cx="12" cy="14" r="7"/>
+    <path d="M12 7V4" strokeLinecap="round"/>
+    <path d="M12 5C10.5 3.5 8 4 8.5 6" strokeLinecap="round"/>
+    <path d="M12 5C13.5 3.5 16 4 15.5 6" strokeLinecap="round"/>
+  </>} />,
   timer:   (p: IconProps) => <Icon {...p} d={<><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/><path d="M19 5l1.5-1.5"/></>} />,
   check:   (p: IconProps) => <Icon {...p} d={<><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></>} />,
   chart:   (p: IconProps) => <Icon {...p} d={<><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-6"/></>} />,

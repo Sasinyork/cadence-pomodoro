@@ -64,7 +64,7 @@ export function Sidebar({ theme: t, accent, active, isDark, themeSource, userEma
           transform: logoHovered ? 'scale(1.08) rotate(-4deg)' : 'scale(1) rotate(0deg)',
           transition: 'box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1)',
         }}>
-          <Icons.timer size={18} color="#fff" strokeWidth={2.2} />
+          <Icons.logo size={18} color="#fff" strokeWidth={2.2} />
         </div>
         <div>
           <div style={{
