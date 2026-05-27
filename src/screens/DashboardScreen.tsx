@@ -89,10 +89,12 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
               sessionCount={state.sessionCount}
               totalSessions={state.settings.longBreakAfter}
               linkedTask={activeTask}
+              soundEnabled={state.settings.soundEffects}
               onStart={startTimer}
               onPause={pauseTimer}
               onReset={resetTimer}
               onSkip={skipSession}
+              onToggleSound={() => dispatch({ type: 'UPDATE_SETTINGS', settings: { soundEffects: !state.settings.soundEffects } })}
             />
           )}
 

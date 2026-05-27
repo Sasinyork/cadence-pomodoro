@@ -17,16 +17,18 @@ interface TimerCardProps {
   sessionCount: number;
   totalSessions: number;
   linkedTask: Task | null;
+  soundEnabled: boolean;
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
   onSkip: () => void;
+  onToggleSound: () => void;
 }
 
 export function TimerCard({
   theme: t, accent, mode, timerState, secondsLeft, totalSecs,
   timerStyle, sessionCount, totalSessions, linkedTask,
-  onStart, onPause, onReset, onSkip,
+  soundEnabled, onStart, onPause, onReset, onSkip, onToggleSound,
 }: TimerCardProps) {
   const running = timerState === 'running';
   const isIdle = timerState === 'idle';
@@ -67,8 +69,11 @@ export function TimerCard({
           </span>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
-          <IconBtn theme={t} icon={<Icons.bell size={16} />} accent={accent} />
-          <IconBtn theme={t} icon={<Icons.dots size={16} />} accent={accent} />
+          <IconBtn
+            theme={t} icon={<Icons.bell size={16} />} accent={accent}
+            active={soundEnabled} onClick={onToggleSound}
+            label={soundEnabled ? 'Mute sound' : 'Enable sound'}
+          />
         </div>
       </div>
 

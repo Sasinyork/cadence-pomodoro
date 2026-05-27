@@ -38,6 +38,15 @@ export default function App() {
   useDbSync(user?.id ?? null);
 
   useEffect(() => {
+    if (!state.settings.pauseWhenInactive) return;
+    function handleVisibilityChange() {
+      if (document.hidden && state.timerState === 'running') pauseTimer();
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [state.settings.pauseWhenInactive, state.timerState, pauseTimer]);
+
+  useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const inInput = document.activeElement?.tagName === 'INPUT'
         || document.activeElement?.tagName === 'TEXTAREA'
