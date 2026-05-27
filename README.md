@@ -14,6 +14,7 @@ A focused productivity app built with React, TypeScript, and Supabase. Combines 
 - **Guest mode** — try the app without signing in; data stored locally
 - **Theming** — light / dark / system modes with four color palettes (Classic, Sunset, Forest, Candy)
 - **Keyboard shortcuts** — Space / R / S for timer control; `⌘⇧1-4` for navigation; `⌘K` to open the shortcuts panel
+- **Pause when inactive** — timer auto-pauses when you switch tabs; resume manually when you return
 - **Responsive** — dedicated mobile layout with tab navigation
 - **Browser notifications** — session-complete alerts (with permission prompt)
 
@@ -99,7 +100,20 @@ src/
 └── types/index.ts       # Shared TypeScript types
 supabase/
 └── schema.sql           # Tables + RLS policies (run once in Supabase SQL Editor)
+tests/
+└── app.spec.ts          # Playwright end-to-end tests
+playwright.config.ts     # Playwright config (targets localhost:5173)
 ```
+
+## Testing
+
+End-to-end tests run against the dev server with Playwright:
+
+```bash
+npx playwright test
+```
+
+Covers guest mode, timer controls (including keyboard shortcuts), task CRUD, and sidebar navigation.
 
 ## Database schema
 
