@@ -13,6 +13,7 @@ A focused productivity app built with React, TypeScript, and Supabase. Combines 
 - **Auth** — passwordless magic-link sign-in via email (no password required)
 - **Guest mode** — try the app without signing in; data stored locally
 - **Theming** — light / dark / system modes with four color palettes (Classic, Sunset, Forest, Candy)
+- **Keyboard shortcuts** — Space / R / S for timer control; `⌘⇧1-4` for navigation; `⌘K` to open the shortcuts panel
 - **Responsive** — dedicated mobile layout with tab navigation
 - **Browser notifications** — session-complete alerts (with permission prompt)
 
@@ -20,7 +21,7 @@ A focused productivity app built with React, TypeScript, and Supabase. Combines 
 
 | Layer | Technology |
 |---|---|
-| Framework | React 18 + TypeScript |
+| Framework | React 19 + TypeScript |
 | Build | Vite |
 | State | React Context + useReducer |
 | Database | Supabase (PostgreSQL) |
@@ -82,7 +83,8 @@ src/
 │   └── AuthContext.tsx  # Supabase auth session
 ├── hooks/
 │   ├── useAnalytics.ts  # Fetches & computes analytics from focus_sessions
-│   └── useDbSync.ts     # Bridges AppContext ↔ Supabase
+│   ├── useDbSync.ts     # Bridges AppContext ↔ Supabase
+│   └── useEscapeKey.ts  # Shared Escape key handler for modals
 ├── lib/
 │   ├── db.ts            # All Supabase queries
 │   ├── supabase.ts      # Supabase client singleton
