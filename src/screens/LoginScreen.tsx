@@ -4,6 +4,7 @@ import { alpha } from '../lib/tokens';
 import { Icons } from '../components/icons';
 
 const ACCENT = '#EF4444';
+const ACCENT_DARK = '#C53030';
 
 export function LoginScreen({ onGuest }: { onGuest: () => void }) {
   const { signInWithEmail } = useAuth();
@@ -42,7 +43,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
           </div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: '#171717', letterSpacing: -0.3 }}>Cadence</div>
-            <div style={{ fontSize: 12, color: '#A3A3A3' }}>Pomodoro · task manager</div>
+            <div style={{ fontSize: 12, color: '#6B6B6B' }}>Pomodoro · task manager</div>
           </div>
         </div>
 
@@ -105,7 +106,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
                 disabled={loading}
                 className="flex items-center justify-center gap-2"
                 style={{
-                  height: 42, borderRadius: 8, background: ACCENT,
+                  height: 42, borderRadius: 8, background: ACCENT_DARK,
                   color: '#fff', fontSize: 14, fontWeight: 600,
                   border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.7 : 1, fontFamily: 'inherit',
@@ -115,7 +116,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
               </button>
             </form>
 
-            <div style={{ marginTop: 20, fontSize: 12, color: '#A3A3A3', textAlign: 'center', lineHeight: 1.6 }}>
+            <div style={{ marginTop: 20, fontSize: 12, color: '#6B6B6B', textAlign: 'center', lineHeight: 1.6 }}>
               Your data is tied to your email and syncs across all your devices.
             </div>
 
@@ -124,7 +125,7 @@ export function LoginScreen({ onGuest }: { onGuest: () => void }) {
                 onClick={onGuest}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: 13, color: '#A3A3A3', textDecoration: 'underline',
+                  fontSize: 13, color: '#6B6B6B', textDecoration: 'underline',
                   fontFamily: 'inherit',
                 }}
               >

@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useApp } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useDbSync } from './hooks/useDbSync';
 import { SURFACE, getAccent } from './lib/tokens';
 import { Sidebar } from './components/layout/Sidebar';
 import { KeyboardShortcutsModal } from './components/layout/KeyboardShortcutsModal';
-import { DashboardScreen } from './screens/DashboardScreen';
-import { AnalyticsScreen } from './screens/AnalyticsScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
-import { MobileScreen } from './screens/MobileScreen';
 import { LoginScreen } from './screens/LoginScreen';
+
+const DashboardScreen = lazy(() => import('./screens/DashboardScreen').then(m => ({ default: m.DashboardScreen })));
+const AnalyticsScreen = lazy(() => import('./screens/AnalyticsScreen').then(m => ({ default: m.AnalyticsScreen })));
+const SettingsScreen  = lazy(() => import('./screens/SettingsScreen').then(m => ({ default: m.SettingsScreen })));
+const MobileScreen    = lazy(() => import('./screens/MobileScreen').then(m => ({ default: m.MobileScreen })));
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -111,7 +112,9 @@ export default function App() {
   if (isMobile) {
     return (
       <div className="w-screen h-dvh overflow-hidden">
-        <MobileScreen theme={t} accent={accent} />
+        <Suspense fallback={null}>
+          <MobileScreen theme={t} accent={accent} />
+        </Suspense>
       </div>
     );
   }
@@ -142,15 +145,17 @@ export default function App() {
       />
 
       <div id="main-content" className="flex-1 flex overflow-hidden">
-        {(state.currentScreen === 'timer' || state.currentScreen === 'tasks') && (
-          <DashboardScreen theme={t} accent={accent} />
-        )}
-        {state.currentScreen === 'analytics' && (
-          <AnalyticsScreen theme={t} accent={accent} />
-        )}
-        {state.currentScreen === 'settings' && (
-          <SettingsScreen theme={t} accent={accent} />
-        )}
+        <Suspense fallback={null}>
+          {(state.currentScreen === 'timer' || state.currentScreen === 'tasks') && (
+            <DashboardScreen theme={t} accent={accent} />
+          )}
+          {state.currentScreen === 'analytics' && (
+            <AnalyticsScreen theme={t} accent={accent} />
+          )}
+          {state.currentScreen === 'settings' && (
+            <SettingsScreen theme={t} accent={accent} />
+          )}
+        </Suspense>
       </div>
 
       {showShortcuts && (
