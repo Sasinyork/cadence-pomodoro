@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { SurfaceTokens } from '../../types';
 import { alpha } from '../../lib/tokens';
 import { Icons } from '../icons';
@@ -11,7 +12,7 @@ interface MobileTabBarProps {
   onNavigate: (s: Screen) => void;
 }
 
-export function MobileTabBar({ theme: t, accent, active, onNavigate }: MobileTabBarProps) {
+export const MobileTabBar = memo(function MobileTabBar({ theme: t, accent, active, onNavigate }: MobileTabBarProps) {
   const tabs: { id: Screen; label: string; icon: React.ReactNode }[] = [
     { id: 'timer',     label: 'Timer',    icon: <Icons.timer size={20} /> },
     { id: 'tasks',     label: 'Tasks',    icon: <Icons.check size={20} /> },
@@ -51,7 +52,7 @@ export function MobileTabBar({ theme: t, accent, active, onNavigate }: MobileTab
       })}
     </nav>
   );
-}
+});
 
 export function MobileStatusBar({ theme: t }: { theme: SurfaceTokens }) {
   return (

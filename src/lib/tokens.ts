@@ -38,9 +38,13 @@ export function getAccent(mode: Mode, palette: Palette): string {
   return PALETTES[palette][mode];
 }
 
+const _alphaCache: Record<string, string> = {};
 export function alpha(hex: string, a: number): string {
+  const key = `${hex}_${a}`;
+  const cached = _alphaCache[key];
+  if (cached) return cached;
   const h = hex.replace('#', '');
   const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return `rgba(${r},${g},${b},${a})`;
+  return (_alphaCache[key] = `rgba(${r},${g},${b},${a})`);
 }
