@@ -67,6 +67,7 @@ export function useDbSync(userId: string | null) {
 
     const prev = prevTasksRef.current;
     const curr = state.tasks;
+    // eslint-disable-next-line react-hooks/immutability
     prevTasksRef.current = curr;
 
     const prevMap = new Map(prev.map((t) => [t.id, t]));
@@ -102,6 +103,7 @@ export function useDbSync(userId: string | null) {
 
     const prev = prevDeletedTasksRef.current;
     const curr = state.deletedTasks;
+    // eslint-disable-next-line react-hooks/immutability
     prevDeletedTasksRef.current = curr;
 
     const prevIds = new Set(prev.map((t) => t.id));

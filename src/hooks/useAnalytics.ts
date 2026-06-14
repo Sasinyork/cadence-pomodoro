@@ -64,6 +64,7 @@ export function useAnalytics(tasks: Task[], refreshKey: number): AnalyticsData {
   const [data, setData] = useState<AnalyticsData>({ ...EMPTY, loading: !!userId });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!userId) { setData(EMPTY); return; }
 
     setData((prev) => ({ ...prev, loading: true }));

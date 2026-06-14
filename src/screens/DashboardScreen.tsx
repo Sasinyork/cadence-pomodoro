@@ -51,7 +51,7 @@ export function DashboardScreen({ theme: t, accent }: { theme: SurfaceTokens; ac
     }
   }
 
-  function handleEditTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>, _startNow: boolean) {
+  function handleEditTask(data: Omit<Task, 'id' | 'createdAt' | 'active' | 'done' | 'completed'>) {
     if (!editingTask) return;
     dispatch({ type: 'UPDATE_TASK', task: { ...editingTask, ...data, done: Math.min(editingTask.done, data.total) } });
     setEditingTask(null);

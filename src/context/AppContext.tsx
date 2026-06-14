@@ -206,6 +206,7 @@ function reducer(state: AppState, action: Action): AppState {
     case 'RESTORE_TASK': {
       const entry = state.deletedTasks.find((t) => t.id === action.id);
       if (!entry) return state;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { deletedAt: _d, ...restored } = entry;
       return {
         ...state,
@@ -352,6 +353,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be used within AppProvider');
